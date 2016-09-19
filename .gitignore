@@ -1,3 +1,6 @@
+# lib
+/static/*
+
 # Logs
 logs
 *.log
