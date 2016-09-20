@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const router = new express.Router();
 
@@ -11,6 +12,10 @@ fs.readdir('./views/mans', (err, files) => {
 });
 
 /* GET home page. */
+router.get('/', (req, res, next) => {
+    res.render('index', {'title': 'Express', 'mans': mans});
+});
+
 router.get('/:man', (req, res, next) => {
     res.render('mans/' + req.params.man, {'title': 'Express'});
 });
