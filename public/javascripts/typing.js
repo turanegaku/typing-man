@@ -19,6 +19,9 @@ $(() => {
                            .replace(/<span>-<\/span>\n/g, '<span class="skip">-</span>\n'));
     });
 
+    $('#question span:last-child')
+    .after('<span> </span>');
+
     const questions = $('#question span:not(:has(*))');
     const itr_question = questions[Symbol.iterator]();
     let question = $(itr_question.next().value);
