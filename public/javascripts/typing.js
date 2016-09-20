@@ -34,9 +34,7 @@ $(() => {
         const dx = getRandomArbitary(-30, +30);
         const q = question.clone();
         const p = question.position();
-        q.css({'position': 'absolute', 'left': p.left, 'top': p.top})
-        .css({'font-size': '+=10px'})
-        .insertAfter($('#drop'))
+        .appendTo('#drop')
         .animate({'left': '+=' + dx + 'px'}, {
             'duration': 800,
             'queue': false
@@ -93,9 +91,9 @@ $(() => {
             const p = question.position();
             q
             .text(String.fromCharCode(e.which))
-            .css({'position': 'absolute', 'left': p.left, 'top': p.top})
-            .css({'font-size': '+=10px', 'text-decoration': 'none', 'color': 'blue'})
-            .insertAfter($('#drop'))
+            .css({'text-decoration': 'none'})
+            .css({'left': p.left, 'top': p.top})
+            .appendTo('#drop')
             .animate({'top': '-=50px'}, {'queue': false, 'easing': 'easeInOutCubic'})
             .fadeOut(1000, () => {q.remove();});
         }

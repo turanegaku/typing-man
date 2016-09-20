@@ -22,8 +22,18 @@ a {
   font-size: 2.1vw;
 }
 
+#drop span {
+  position: absolute;
+}
+
+#drop span.done {
+  color: orange;
+  font-size: 2.2vw;
+}
+
 #drop span.miss {
   color: blue;
+  font-size: 3vw;
 }
 
 .tab {
