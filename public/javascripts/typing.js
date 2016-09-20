@@ -17,6 +17,15 @@ $(() => {
         }
         return false;
     }
+    function isback(e) {
+        if (e.which == 8) {
+            return true;
+        }
+        if (e.ctrlKey && e.which == 104) {
+            return true;
+        }
+        return false;
+    }
 
 
     $('#question :not(:has(p))').contents()
@@ -35,6 +44,9 @@ $(() => {
     const itr_question = questions[Symbol.iterator]();
     let question = $(itr_question.next().value);
     question.css({'text-decoration': 'underline'});
+
+    const miss = $('#miss');
+
     let starting = false;
     let start_time;
     let interval_id;
@@ -82,8 +94,16 @@ $(() => {
             start_time = moment();
             interval_id = setInterval(updateTimer, 50);
         }
-        if (question.next().length && question.text() === String.fromCharCode(e.which)
-            || !question.next().length && isnl(e)) { // correct type
+
+        if (isback(e)) { // delete miss
+            if (miss.children().length) {
+                miss.children().last().remove();
+            }
+            return false;
+        }
+        if (!miss.children().length
+            && (question.next().length && question.text() === String.fromCharCode(e.which)
+            || !question.next().length && isnl(e))) { // correct type
             nextChar();
         } else { // incorrect type
             $('#error .value').text(+$('#error .value').text() + 1);
@@ -91,13 +111,15 @@ $(() => {
 
             const q = question.clone();
             const p = question.position();
+            miss.css({'left': p.left, 'top': p.top});
             q
             .text(String.fromCharCode(e.which))
             .css({'text-decoration': 'none'})
-            .css({'left': p.left, 'top': p.top})
-            .appendTo('#drop')
-            .animate({'top': '-=50px'}, {'queue': false, 'easing': 'easeInOutCubic'})
-            .fadeOut(1000, () => {q.remove();});
+            // .css({'left': p.left, 'top': p.top})
+            .appendTo(miss)
+            ;
+            // .animate({'top': '-=50px'}, {'queue': false, 'easing': 'easeInOutCubic'})
+            // .fadeOut(1000, () => {q.remove();});
         }
 
         if (e.which === 32) {
