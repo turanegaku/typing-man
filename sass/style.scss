@@ -8,18 +8,18 @@ a {
   color: #00B7FF;
 }
 
-#question span.done {
-  color: red;
-}
-
-#question span.miss {
-  color: cyan;
-  background-color: rgba(0, 0, 255, 0.6);
-}
-
-#question span.movable {
-  color: blue;
-  font-size: 2.1vw;
+#question span {
+  &.done {
+    color: red;
+  }
+  &.miss {
+    color: cyan;
+    background-color: rgba(0, 0, 255, 0.6);
+  }
+  &.movable {
+    color: blue;
+    font-size: 2.1vw;
+  }
 }
 
 #drop span.miss {
@@ -31,16 +31,16 @@ a {
 }
 
 dt, h3 {
-  white-space: pre;
+  white-space:pre;
   font-size: 2.2vw;
 }
 
-dd, p {
+dd, p  {
   white-space: pre;
   font-size: 2vw;
 }
 
 .inline-3 {
-  width: 30%;
-  display: inline-block;
+    width: 30%;
+    display: inline-block;
 }
