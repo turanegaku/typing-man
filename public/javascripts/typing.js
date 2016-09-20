@@ -110,13 +110,12 @@ $(() => {
                 $('#error .value').text(+$('#error .value').text() + 1);
                 question.addClass('miss');
 
-                const q = question.clone();
                 const p = question.position();
-                miss.css({'left': p.left, 'top': p.top});
-                q
-                .text(String.fromCharCode(e.which))
-                .css({'text-decoration': 'none'})
-                .appendTo(miss);
+                miss.css({'left': p.left, 'top': p.top})
+                .append($('<span>', {
+                    'class': 'miss',
+                    'text': String.fromCharCode(e.which)
+                }));
             }
         }
 

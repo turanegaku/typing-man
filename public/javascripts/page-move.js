@@ -32,9 +32,9 @@ $(() => {
     questions.css({'text-decoration': 'underline'});
 
     questions
-    .before('<span></span>');
+    .before($('<span>'));
     $('#question a span:last-child')
-    .after('<span></span>');
+    .after($('<span>'));
 
     const all = $('#question a > span');
 
