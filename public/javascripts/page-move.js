@@ -36,10 +36,13 @@ $(() => {
     $('#question a span:last-child')
     .after('<span></span>');
 
+    const all = $('#question a > span');
+
     questions.each((i, q) => {
         let question = $(q);
         const parent = question.parent();
         const siblings = parent.children();
+        console.log(siblings);
 
         $('html').keypress((e) => {
             if (question.text() === String.fromCharCode(e.which)) {
@@ -49,7 +52,7 @@ $(() => {
 
                 if (!question.next().length) {              // done sentence
                     parent.attr('href', parent.text());     // click able
-                    siblings.removeClass('movable');        // remove other
+                    all.removeClass('movable');        // remove other
                     siblings.addClass('movable');           // add self
                 }
             }
@@ -57,7 +60,7 @@ $(() => {
             if (isback(e)) {
                 if (question.prev().prev().length) {
                     parent.removeAttr('href');
-                    siblings.removeClass('movable');
+                    all.removeClass('movable');
 
                     question.css({'text-decoration': 'none'});
                     question = question.prev();

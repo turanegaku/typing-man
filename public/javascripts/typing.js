@@ -48,6 +48,7 @@ $(() => {
     const miss = $('#miss');
 
     let starting = false;
+    let finish = false;
     let start_time;
     let interval_id;
 
@@ -77,6 +78,7 @@ $(() => {
         const nq = itr_question.next();
         if (nq.done) { // finish all
             updateTimer();
+            finish = true;
 
             questions.animate({'opacity': 1}, 'slow', 'easeInQuad');
             clearInterval(interval_id);
@@ -95,34 +97,30 @@ $(() => {
             interval_id = setInterval(updateTimer, 50);
         }
 
-        if (isback(e)) { // delete miss
-            if (miss.children().length) {
-                miss.children().last().remove();
+        if (!finish) {
+            if (isback(e)) { // delete miss
+                if (miss.children().length) {
+                    miss.children().last().remove();
+                }
+            } else if (!miss.children().length
+                   && (question.next().length && question.text() === String.fromCharCode(e.which)
+                   || !question.next().length && isnl(e))) { // correct type
+                nextChar();
+            } else { // incorrect type
+                $('#error .value').text(+$('#error .value').text() + 1);
+                question.addClass('miss');
+
+                const q = question.clone();
+                const p = question.position();
+                miss.css({'left': p.left, 'top': p.top});
+                q
+                .text(String.fromCharCode(e.which))
+                .css({'text-decoration': 'none'})
+                .appendTo(miss);
             }
-            return false;
-        }
-        if (!miss.children().length
-            && (question.next().length && question.text() === String.fromCharCode(e.which)
-            || !question.next().length && isnl(e))) { // correct type
-            nextChar();
-        } else { // incorrect type
-            $('#error .value').text(+$('#error .value').text() + 1);
-            question.addClass('miss');
-
-            const q = question.clone();
-            const p = question.position();
-            miss.css({'left': p.left, 'top': p.top});
-            q
-            .text(String.fromCharCode(e.which))
-            .css({'text-decoration': 'none'})
-            // .css({'left': p.left, 'top': p.top})
-            .appendTo(miss)
-            ;
-            // .animate({'top': '-=50px'}, {'queue': false, 'easing': 'easeInOutCubic'})
-            // .fadeOut(1000, () => {q.remove();});
         }
 
-        if (e.which === 32) {
+        if (e.which == 8 || e.which == 39) {
             return false;
         }
     });
