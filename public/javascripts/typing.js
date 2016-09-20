@@ -8,6 +8,15 @@ $(() => {
         const t = moment(moment() - start_time).format('mm:ss.SS');
         $('#time .value').text(t);
     }
+    function isnl(e) {
+        if (e.which == 13) {
+            return true;
+        }
+        if (e.ctrlKey && e.which == 109) {
+            return true;
+        }
+        return false;
+    }
 
 
     $('#question :not(:has(p))').contents()
@@ -35,24 +44,26 @@ $(() => {
         question.css({'text-decoration': 'none'});
 
         const dx = getRandomArbitary(-30, +30);
+        const dy = getRandomArbitary(650, 750);
         const q = question.clone();
         const p = question.position();
+        q.css({'left': p.left, 'top': p.top})
         .appendTo('#drop')
         .animate({'left': '+=' + dx + 'px'}, {
-            'duration': 800,
+            'duration': 1000,
             'queue': false
         })
-        .animate({'top': '+=600px'}, {
-            'duration': 800,
+        .animate({'top': '+=300px'}, {
+            'duration': 1000,
             'queue': false,
-            'easing': 'easeInOutCubic'
+            'easing': 'easeInOutBack'
         })
-        .fadeOut(800, () => {q.remove();});
+        .fadeOut(700, 'easeInCubic', () => {q.remove();});
 
         question.css({'opacity': 0.1});
 
         const nq = itr_question.next();
-        if (nq.done) {
+        if (nq.done) { // finish all
             updateTimer();
 
             questions.animate({'opacity': 1}, 'slow', 'easeInQuad');
@@ -63,18 +74,6 @@ $(() => {
         if (question.hasClass('skip')) {
             nextChar();
         }
-    }
-
-    function isnl(e) {
-        if (e.which == 13) {
-            return true;
-        }
-        if (e.ctrlKey) {
-            if (e.which == 106 || e.which == 109) {
-                return true;
-            }
-        }
-        return false;
     }
 
     $('html').keypress((e) => {
