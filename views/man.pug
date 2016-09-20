@@ -6,14 +6,19 @@ block info
       dt: h3 ERROR
       dd.value 0
   .inline-3
+    p: span.enter NewLine(Enter)
+    p: span.delete Delete(BS)
   #time.inline-3
     dl
       dt: h3 Time
       dd.value 00:00.00
-  p
-    span.enter NewLine(Enter)
-    | に注意
+  p.inline-3
+  p.inline-3
   p キー入力と同時にスタートします
+
+block content
+  #drop
+  #miss
 
 block script
   script(type='text/javascript', src='/javascripts/typing.js')

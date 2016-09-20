@@ -12,13 +12,20 @@ a {
   background-color: mistyrose;
 }
 
-#question span.done {
-  color: orange;
+.delete, #miss span.miss {
+  color: lavenderblush;
+  font-size: 2vw;
+  position: relative;
+  background-color: crimson;
+}
+
+.done {
+  color: springgreen;
 }
 
 #question span.miss {
-  color: cyan;
-  background-color: rgba(0, 0, 255, 0.6);
+  color: crimson;
+  background-color: lavenderblush;
 }
 
 #question span.movable {
@@ -31,13 +38,16 @@ a {
 }
 
 #drop span.done {
-  color: orange;
-  font-size: 2.2vw;
+  font-size: 2.5vw;
 }
 
 #drop span.miss {
-  color: blue;
-  font-size: 3vw;
+  color: red;
+}
+
+#miss {
+  position: absolute;
+  white-space: pre;
 }
 
 .tab {

@@ -11,14 +11,20 @@ a {
 .enter {
   background-color: mistyrose;
 }
+.delete {
+  color: lavenderblush;
+  font-size: 2vw;
+  position: relative;
+  background-color: crimson;
+}
+.done {
+    color: springgreen;
+}
 
 #question span {
-  &.done {
-    color: orange;
-  }
   &.miss {
-    color: cyan;
-    background-color: rgba(0, 0, 255, 0.6);
+    color: crimson;
+    background-color: lavenderblush;
   }
   &.movable {
     color: blue;
@@ -27,15 +33,22 @@ a {
 }
 
 #drop span {
-  position:absolute;
+  position: absolute;
 
   &.done {
-    color: orange;
-    font-size: 2.2vw;
+    font-size: 2.5vw;
   }
   &.miss {
-    color: blue;
-    font-size: 3vw;
+    color: red;
+  }
+}
+
+#miss {
+  position: absolute;
+  white-space: pre;
+
+  span.miss {
+    @extend .delete
   }
 }
 
