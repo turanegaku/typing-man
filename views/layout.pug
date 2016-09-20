@@ -4,7 +4,14 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
-    block content
+    #info
+      block info
+    hr
+    #question
+      block question
+    #drop
+      block drop
+
     script(type='text/javascript', src='/static/js/jquery.min.js')
     script(type='text/javascript', src='/static/js/jquery.easing.min.js')
     script(type='text/javascript', src='/static/js/moment.min.js')
