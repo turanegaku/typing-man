@@ -69,7 +69,6 @@ $(() => {
     });
 
     $('html').keypress((e) => {
-        console.log(e.which);
         const link = $('#question a:has(span.movable)');
         if (isnl(e) && link.length) {
             location.href = link.text();
