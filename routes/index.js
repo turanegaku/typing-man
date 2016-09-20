@@ -13,11 +13,11 @@ fs.readdir('./views/mans', (err, files) => {
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-    res.render('index', {'title': 'Express', 'mans': mans});
+    res.render('index', {'title': 'typing-man', 'mans': mans});
 });
 
 router.get('/:man', (req, res, next) => {
-    res.render('mans/' + req.params.man, {'title': 'Express'});
+    res.render('mans/' + req.params.man, {'title': 'typing-man'});
 });
 
 module.exports = router;

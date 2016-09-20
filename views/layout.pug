@@ -4,12 +4,16 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
-    #info
-      block info
-    hr
-    #question
-      block question
-    block content
+    header
+      h1: a(href='/')= title
+
+    .container
+      #info
+        block info
+      hr
+      #question
+        block question
+      block content
 
     script(type='text/javascript', src='/static/js/jquery.min.js')
     script(type='text/javascript', src='/static/js/jquery.easing.min.js')
