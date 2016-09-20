@@ -9,7 +9,7 @@ a {
 }
 
 #question span.done {
-  color: red;
+  color: orange;
 }
 
 #question span.miss {
