@@ -10,7 +10,7 @@ $(() => {
     }
 
 
-    $('#question').find(':not(:has(p))').contents()
+    $('#question :not(:has(p))').contents()
     .filter((_, t) => {
         return t.nodeType === 3;
     }).each((i, txt) => {
@@ -19,7 +19,7 @@ $(() => {
                            .replace(/<span>-<\/span>\n/g, '<span class="skip">-</span>\n'));
     });
 
-    const questions = $('#question').find('span:not(:has(*))');
+    const questions = $('#question span:not(:has(*))');
     const itr_question = questions[Symbol.iterator]();
     let question = $(itr_question.next().value);
     question.css({'text-decoration': 'underline'});
@@ -31,15 +31,22 @@ $(() => {
         question.addClass('done');
         question.css({'text-decoration': 'none'});
 
-        const dx = getRandomArbitary(-50, 150);
+        const dx = getRandomArbitary(-30, +30);
         const q = question.clone();
         const p = question.position();
         q.css({'position': 'absolute', 'left': p.left, 'top': p.top})
         .css({'font-size': '+=10px'})
         .insertAfter($('#drop'))
-        .animate({'left': '+=' + dx + 'px'}, {'queue': false})
-        .animate({'top': '+=800px'}, {'queue': false, 'easing': 'easeInOutCubic'})
-        .fadeOut(1000, () => {q.remove();});
+        .animate({'left': '+=' + dx + 'px'}, {
+            'duration': 800,
+            'queue': false
+        })
+        .animate({'top': '+=600px'}, {
+            'duration': 800,
+            'queue': false,
+            'easing': 'easeInOutCubic'
+        })
+        .fadeOut(800, () => {q.remove();});
 
         question.css({'opacity': 0.1});
 
