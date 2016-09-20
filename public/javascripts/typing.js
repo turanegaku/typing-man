@@ -57,7 +57,7 @@ $(() => {
         question.css({'text-decoration': 'none'});
 
         const dx = getRandomArbitary(-30, +30);
-        const dy = getRandomArbitary(650, 750);
+        const dy = getRandomArbitary(250, 350);
         const q = question.clone();
         const p = question.position();
         q.css({'left': p.left, 'top': p.top})
@@ -66,7 +66,7 @@ $(() => {
             'duration': 1000,
             'queue': false
         })
-        .animate({'top': '+=300px'}, {
+        .animate({'top': '+=' + dy + 'px'}, {
             'duration': 1000,
             'queue': false,
             'easing': 'easeInOutBack'
