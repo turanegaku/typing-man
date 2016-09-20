@@ -29,7 +29,7 @@ $(() => {
     });
 
     $('#question span:last-child')
-    .after('<span> </span>');
+    .after('<span class="enter"> </span>');
 
     const questions = $('#question span:not(:has(*))');
     const itr_question = questions[Symbol.iterator]();

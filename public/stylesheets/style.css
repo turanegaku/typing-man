@@ -8,6 +8,10 @@ a {
   color: #00B7FF;
 }
 
+.enter {
+  background-color: mistyrose;
+}
+
 #question span.done {
   color: orange;
 }
