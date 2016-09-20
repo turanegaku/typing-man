@@ -1,0 +1,16 @@
+extends layout
+
+block info
+  #error.inline-3
+    dl
+      dt: h3 ERROR
+      dd.value 0
+  .inline-3
+  #time.inline-3
+    dl
+      dt: h3 Time
+      dd.value 00:00.00
+  p キー入力と同時にスタートします
+
+block script
+  script(type='text/javascript', src='/javascripts/typing.js')
