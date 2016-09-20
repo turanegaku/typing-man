@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const router = new express.Router();
 
-const mans = [];
+const mans = new Array();
 
 fs.readdir('./views/mans', (err, files) => {
     files.forEach((file) => {
@@ -17,7 +17,12 @@ router.get('/', (req, res, next) => {
 });
 
 router.get('/:man', (req, res, next) => {
-    res.render('mans/' + req.params.man, {'title': 'typing-man'});
+    console.log(req.params.man in mans);
+    if (mans.indexOf(req.params.man) >= 0) {
+        res.render('mans/' + req.params.man, {'title': 'typing-man'});
+    } else {
+        next();
+    }
 });
 
 module.exports = router;
