@@ -90,7 +90,6 @@ $(() => {
             const record = moment(result.text(), 'mm:ss.SS');
             if (my_record <= record) {
                 step |= TYPING;
-                console.log(i, record);
                 $('<li>', {'class': 'my'})
                 .append(
                     $('<div>', {'class': 'inline-3 name'})
@@ -113,6 +112,18 @@ $(() => {
                 .hide().show(500);
 
                 ranks.last().hide(500);
+                const cookies = {};
+                document.cookie.split('; ').forEach(c => {
+                    const str = c.split('=');
+                    cookies[str[0]] = str[1];
+                });
+                if (cookies.name) {
+                    for (let i = 0; i < cookies.name.length; ++i) {
+                        $('#rank ol > li.my .name .enter').before(
+                            $('<span>', {'text': cookies.name[i]})
+                        );
+                    }
+                }
 
                 return false;
             }
@@ -190,7 +201,6 @@ $(() => {
                 } else if (isnl(e)) {
                     step &= ~TYPING;
                     name.children('.enter, .yet').remove();    // delete miss
-                    console.log(name.children().text(), timer.text());
                     $.ajax({
                         'type': 'POST',
                         'dataType': 'json',
