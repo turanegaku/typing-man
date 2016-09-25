@@ -29,6 +29,9 @@ header h1 a {
 .done {
     color: springgreen;
 }
+.now {
+    text-decoration: underline;
+}
 
 #question span {
   &.miss {
@@ -61,6 +64,41 @@ header h1 a {
   }
 }
 
+#rank ol li {
+  white-space: pre;
+
+  .yet {
+      opacity: .5;
+  }
+  :not(.enter) ~ .yet {
+      visibility: hidden;
+  }
+
+  &.my .name span {
+    &:nth-child(12) {
+      text-decoration: underline;
+    }
+    &:nth-child(13) {
+      visibility: hidden;
+    }
+  }
+}
+
+button.invert {
+    cursor: pointer;
+    font-size: 2vw;
+    background: darkslategrey;
+    color: azure;
+    border-style: None;
+    padding: 5px;
+    margin: 2px;
+    box-shadow: 1px 1px 2px 1px #666;
+
+    &:hover {
+        background: black;
+    }
+}
+
 .tab {
   padding-left: 2.5em;
 }
@@ -79,7 +117,15 @@ dd, p  {
   font-size: 2vw;
 }
 
+.inline-1 {
+    width: 10%;
+    display: inline-block;
+}
 .inline-3 {
     width: 30%;
+    display: inline-block;
+}
+.inline-6 {
+    width: 60%;
     display: inline-block;
 }
