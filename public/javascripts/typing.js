@@ -1,4 +1,4 @@
-/* global $ moment */
+/* global $ moment document */
 
 $(() => {
     // =============== constant =============== //
@@ -29,7 +29,7 @@ $(() => {
         return false;
     }
     function isignore(e) {
-        return e.which === 8 || e.which === 32 || e.which == 47; // space, slash
+        return e.which === 8 || e.which === 32 || e.which == 39 || e.which == 47; // space, quote, slash
     }
 
     // =============== ready for start =============== //
@@ -111,7 +111,10 @@ $(() => {
                 .insertBefore(result.parent())
                 .hide().show(500);
 
-                ranks.last().hide(500);
+                ranks.parent().last().hide(500);
+                console.log(ranks);
+
+
                 const cookies = {};
                 document.cookie.split('; ').forEach(c => {
                     const str = c.split('=');
@@ -181,7 +184,7 @@ $(() => {
                         nextChar();
                     }
                 } else if (question.text() === String.fromCharCode(e.which)) {   // incorrect type
-                    if (!miss.children().length) {
+                    if (!miss.children().length && question.next().length) {
                         nextChar();
                     }
                 } else {                                // incorrect type
@@ -203,7 +206,7 @@ $(() => {
                     name.children('.enter, .yet').remove();    // delete miss
                     $.ajax({
                         'type': 'POST',
-                        'dataType': 'json',
+                        'dataType': 'text',
                         'data': {'name': name.text(), 'time': timer.text()},
                         'error': (err) => {
                             console.error(err);
@@ -217,10 +220,9 @@ $(() => {
             }
         }
 
+
         if (step & TYPING) {
-            if (e.which === 39) {
-                return false;
-            }
+            console.log(step & TYPING, step & FINISH);
             if (isignore(e)) { // space, slash
                 // console.log('ignore', e.which);
                 return false;
