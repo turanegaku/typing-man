@@ -1,6 +1,3 @@
-# lib
-/static/*
-
 # db
 *.sqlite3
 
