@@ -114,9 +114,9 @@ $(() => {
                 .hide().show(500);
 
                 ranks.last().hide(500);
-            }
 
-            return false;
+                return false;
+            }
         });
     }
 
