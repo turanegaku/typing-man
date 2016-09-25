@@ -2,10 +2,9 @@
 
 $(() => {
     // =============== constant =============== //
-    const BEFORE_START = 0;
-    const WHILE_TYPING = 1;
-    const RECORD_NAME  = 2;
-    const AFTER_FINISH = 3;
+    const CLEAN  = 0;
+    const TYPING = 1 << 0;
+    const FINISH = 1 << 1;
 
     // =============== useful function =============== //
     function getRandomArbitary(min, max) {
@@ -66,18 +65,19 @@ $(() => {
     let question = $(itr_question.next().value);        // now char should type
     question.addClass('now');
 
-    let step = BEFORE_START;
+    let step = CLEAN;
     let start_time;
     let interval_id;
 
     function start_type() {
-        step = WHILE_TYPING;
+        step |= TYPING;
         start_time = moment();
         interval_id = setInterval(updateTimer, 50);
     }
 
     function finish_type() {
-        step = AFTER_FINISH;
+        step |= FINISH;
+        step &= ~TYPING;
         clearInterval(interval_id);
         updateTimer();
         questions.animate({'opacity': 1}, 'slow', 'easeInQuad');
@@ -89,9 +89,9 @@ $(() => {
             const result = $(r);
             const record = moment(result.text(), 'mm:ss.SS');
             if (my_record <= record) {
-                step = RECORD_NAME;
+                step |= TYPING;
                 console.log(i, record);
-                const dom = $('<li>')
+                $('<li>')
                 .addClass('my')
                 .append(
                     $('<div>', {'class': 'inline-3 name'})
@@ -156,57 +156,59 @@ $(() => {
     }
 
     $('html').keypress((e) => {
-        if (step === BEFORE_START && !isignore(e)) {
+        if (step === CLEAN && !isignore(e)) {
             start_type();
         }
 
-        if (step === WHILE_TYPING) {
-            if (isback(e)) {
-                if (miss.children().length) {
-                    miss.children().last().remove();    // delete miss
-                }
-            } else if (isnl(e)) {
-                if (!question.next().length) {
-                    nextChar();
-                }
-            } else if (question.text() === String.fromCharCode(e.which)) {   // incorrect type
-                if (!miss.children().length) {
-                    nextChar();
-                }
-            } else {                                // incorrect type
-                error.text(+error.text() + 1);              // increment miss count
-                question.addClass('miss');
-
-                const p = question.position();
-                miss.css({'left': p.left, 'top': p.top})                        // set position
-                .append(question.clone().text(String.fromCharCode(e.which)));   // add miss
-            }
-        } else if (step === RECORD_NAME) {
-            const name = $('#rank ol > li.my .name');
-            if (isback(e)) {
-                if (name.children(':not(.enter):not(.yet)').length) {
-                    name.children(':not(.enter):not(.yet)').last().remove();    // delete miss
-                }
-            } else if (isnl(e)) {
-                step = AFTER_FINISH;
-                name.children('.enter, .yet').remove();    // delete miss
-                console.log(name.children().text(), timer.text());
-                $.ajax({
-                    'type': 'POST',
-                    'dataType': 'json',
-                    'data': {'name': name.text(), 'time': timer.text()},
-                    'error': (err) => {
-                        console.error(err);
+        if (step & TYPING) {
+            if (!(step & FINISH)) {
+                if (isback(e)) {
+                    if (miss.children().length) {
+                        miss.children().last().remove();    // delete miss
                     }
-                });
-            } else if (name.children(':not(.enter):not(.yet)').length < 12) {
-                name.children('.enter').before(
-                    $('<span>', {'text': String.fromCharCode(e.which)})
-                );
+                } else if (isnl(e)) {
+                    if (!question.next().length) {
+                        nextChar();
+                    }
+                } else if (question.text() === String.fromCharCode(e.which)) {   // incorrect type
+                    if (!miss.children().length) {
+                        nextChar();
+                    }
+                } else {                                // incorrect type
+                    error.text(+error.text() + 1);              // increment miss count
+                    question.addClass('miss');
+
+                    const p = question.position();
+                    miss.css({'left': p.left, 'top': p.top})                        // set position
+                    .append(question.clone().text(String.fromCharCode(e.which)));   // add miss
+                }
+            } else {
+                const name = $('#rank ol > li.my .name');
+                if (isback(e)) {
+                    if (name.children(':not(.enter):not(.yet)').length) {
+                        name.children(':not(.enter):not(.yet)').last().remove();    // delete miss
+                    }
+                } else if (isnl(e)) {
+                    step &= ~TYPING;
+                    name.children('.enter, .yet').remove();    // delete miss
+                    console.log(name.children().text(), timer.text());
+                    $.ajax({
+                        'type': 'POST',
+                        'dataType': 'json',
+                        'data': {'name': name.text(), 'time': timer.text()},
+                        'error': (err) => {
+                            console.error(err);
+                        }
+                    });
+                } else if (name.children(':not(.enter):not(.yet)').length < 12) {
+                    name.children('.enter').before(
+                        $('<span>', {'text': String.fromCharCode(e.which)})
+                    );
+                }
             }
         }
 
-        if (step !== BEFORE_START || step !== AFTER_FINISH) {
+        if (step & TYPING) {
             if (e.which === 39) {
                 return false;
             }
