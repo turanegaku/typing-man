@@ -1,33 +1,40 @@
 /* global $ moment */
 
 $(() => {
+    // =============== constant =============== //
+    const BEFORE_START = 0;
+    const WHILE_TYPING = 1;
+    const RECORD_NAME  = 2;
+    const AFTER_FINISH = 3;
+
+    // =============== useful function =============== //
     function getRandomArbitary(min, max) {
         return Math.random() * (max - min) + min;
     }
-    function updateTimer() {
-        const t = moment(moment() - start_time).format('mm:ss.SS');
-        $('#time .value').text(t);
-    }
     function isnl(e) {
-        if (e.which == 13) {
+        if (e.which === 13) {
             return true;
         }
-        if (e.ctrlKey && e.which == 109) {
+        if (e.ctrlKey && e.which === 109) {
             return true;
         }
         return false;
     }
     function isback(e) {
-        if (e.which == 8) {
+        if (e.which === 8) {
             return true;
         }
-        if (e.ctrlKey && e.which == 104) {
+        if (e.ctrlKey && e.which === 104) {
             return true;
         }
         return false;
     }
+    function isignore(e) {
+        return e.which === 8 || e.which === 32 || e.which == 47; // space, slash
+    }
 
-
+    // =============== ready for start =============== //
+    // wrap all char in question with span
     $('#question :not(:has(p))').contents()
     .filter((_, t) => {
         return t.nodeType === 3;
@@ -35,26 +42,88 @@ $(() => {
         $(txt).replaceWith($(txt).text()
                            .replace(/(.)/g, '<span>$1</span>')
                            .replace(/<span>-<\/span>\n/g, '<span class="skip">-</span>\n'));
+                           // '-' which is end of line may be connection word
     });
 
+    // append enter dummy span after end of sentence
     $('#question span:last-child')
     .after('<span class="enter"> </span>');
+    // =============== ready for start =============== //
 
-    const questions = $('#question span:not(:has(*))');
-    const itr_question = questions[Symbol.iterator]();
-    let question = $(itr_question.next().value);
-    question.css({'text-decoration': 'underline'});
+    const questions = $('#question span:not(:has(*))'); // all of char
+    const itr_question = questions[Symbol.iterator]();  // iterator for all of char
+    const miss = $('#miss');                            // collection for misstype chars
 
-    const miss = $('#miss');
+    const error = $('#error .value');
+    const timer = $('#time .value');
 
-    let starting = false;
-    let finish = false;
+    function updateTimer() {
+        const t = moment(moment() - start_time).format('mm:ss.SS');
+        timer.text(t);
+    }
+
+
+    let question = $(itr_question.next().value);        // now char should type
+    question.addClass('now');
+
+    let step = BEFORE_START;
     let start_time;
     let interval_id;
 
+    function start_type() {
+        step = WHILE_TYPING;
+        start_time = moment();
+        interval_id = setInterval(updateTimer, 50);
+    }
+
+    function finish_type() {
+        step = AFTER_FINISH;
+        clearInterval(interval_id);
+        updateTimer();
+        questions.animate({'opacity': 1}, 'slow', 'easeInQuad');
+
+        const my_result = $('#time .value');
+        const my_record = moment(my_result.text(), 'mm:ss.SS');
+        const ranks = $('#rank ol > li .time');
+        ranks.each((i, r) => {
+            const result = $(r);
+            const record = moment(result.text(), 'mm:ss.SS');
+            if (my_record <= record) {
+                step = RECORD_NAME;
+                console.log(i, record);
+                const dom = $('<li>')
+                .addClass('my')
+                .append(
+                    $('<div>', {'class': 'inline-3 name'})
+                    .append($('<span>', {
+                        'text': ' ',
+                        'class': 'enter now',
+                    }))
+                    .append($('<span>', {
+                        'text': 'your name.',
+                        'class': 'yet'
+                    }))
+                )
+                .append(
+                    $('<div>', {
+                        'text': my_result.text(),
+                        'class': 'inline-3 time'
+                    })
+                )
+                .insertBefore(result.parent())
+                .hide().show(500);
+
+                ranks.last().hide(500);
+            }
+
+            return false;
+        });
+    }
+
     function nextChar() {
+        question.attr('time', moment() - start_time);
         question.addClass('done');
-        question.css({'text-decoration': 'none'});
+        question.removeClass('now');
 
         const dx = getRandomArbitary(-30, +30);
         const dy = getRandomArbitary(250, 350);
@@ -76,51 +145,75 @@ $(() => {
         question.css({'opacity': 0.1});
 
         const nq = itr_question.next();
-        if (nq.done) { // finish all
-            updateTimer();
-            finish = true;
-
-            questions.animate({'opacity': 1}, 'slow', 'easeInQuad');
-            clearInterval(interval_id);
+        if (nq.done) {
+            finish_type();
         }
         question = $(nq.value);
-        question.css({'text-decoration': 'underline'});
+        question.addClass('now');
         if (question.hasClass('skip')) {
             nextChar();
         }
     }
 
     $('html').keypress((e) => {
-        if (!starting) {
-            starting = true;
-            start_time = moment();
-            interval_id = setInterval(updateTimer, 50);
+        if (step === BEFORE_START && !isignore(e)) {
+            start_type();
         }
 
-        if (!finish) {
-            if (isback(e)) { // delete miss
+        if (step === WHILE_TYPING) {
+            if (isback(e)) {
                 if (miss.children().length) {
-                    miss.children().last().remove();
+                    miss.children().last().remove();    // delete miss
                 }
-            } else if (!miss.children().length
-                   && (question.next().length && question.text() === String.fromCharCode(e.which)
-                   || !question.next().length && isnl(e))) { // correct type
-                nextChar();
-            } else { // incorrect type
-                $('#error .value').text(+$('#error .value').text() + 1);
+            } else if (isnl(e)) {
+                if (!question.next().length) {
+                    nextChar();
+                }
+            } else if (question.text() === String.fromCharCode(e.which)) {   // incorrect type
+                if (!miss.children().length) {
+                    nextChar();
+                }
+            } else {                                // incorrect type
+                error.text(+error.text() + 1);              // increment miss count
                 question.addClass('miss');
 
                 const p = question.position();
-                miss.css({'left': p.left, 'top': p.top})
-                .append($('<span>', {
-                    'class': 'miss',
-                    'text': String.fromCharCode(e.which)
-                }));
+                miss.css({'left': p.left, 'top': p.top})                        // set position
+                .append(question.clone().text(String.fromCharCode(e.which)));   // add miss
+            }
+        } else if (step === RECORD_NAME) {
+            const name = $('#rank ol > li.my .name');
+            if (isback(e)) {
+                if (name.children(':not(.enter):not(.yet)').length) {
+                    name.children(':not(.enter):not(.yet)').last().remove();    // delete miss
+                }
+            } else if (isnl(e)) {
+                step = AFTER_FINISH;
+                name.children('.enter, .yet').remove();    // delete miss
+                console.log(name.children().text(), timer.text());
+                $.ajax({
+                    'type': 'POST',
+                    'dataType': 'json',
+                    'data': {'name': name.text(), 'time': timer.text()},
+                    'error': (err) => {
+                        console.error(err);
+                    }
+                });
+            } else if (name.children(':not(.enter):not(.yet)').length < 12) {
+                name.children('.enter').before(
+                    $('<span>', {'text': String.fromCharCode(e.which)})
+                );
             }
         }
 
-        if (e.which == 8 || e.which == 39) {
-            return false;
+        if (step !== BEFORE_START || step !== AFTER_FINISH) {
+            if (e.which === 39) {
+                return false;
+            }
+            if (isignore(e)) { // space, slash
+                // console.log('ignore', e.which);
+                return false;
+            }
         }
     });
 });
