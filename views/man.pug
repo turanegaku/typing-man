@@ -15,6 +15,15 @@ block info
   p キー入力と同時にスタートします
 
 block content
+  #rank
+    h3 ランキング
+    ol(style='font-size: 2vw;')
+      for rank in ranks
+        li
+          .inline-3.name= rank.name
+          .inline-3.time= rank.time
+          div
+
   #drop
   #miss
 
