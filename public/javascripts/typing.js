@@ -91,8 +91,7 @@ $(() => {
             if (my_record <= record) {
                 step |= TYPING;
                 console.log(i, record);
-                $('<li>')
-                .addClass('my')
+                $('<li>', {'class': 'my'})
                 .append(
                     $('<div>', {'class': 'inline-3 name'})
                     .append($('<span>', {
