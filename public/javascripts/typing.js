@@ -88,15 +88,17 @@ $(() => {
 
         const my_result = $('#time .value');
         const my_record = moment(my_result.text(), 'mm:ss.SS');
-        const ranks = $('#rank ol > li .time');
+        const my_error  = error.text();
+        const ranks = $('#rank ol > li');
         ranks.each((i, r) => {
             const result = $(r);
-            const record = moment(result.text(), 'mm:ss.SS');
-            if (my_record <= record) {
+            const record = moment(result.children('.time').text(), 'mm:ss.SS');
+            const error = $(r).children('.error');
+            if (my_record < record || my_record === record && error >= my_error) {
                 step |= TYPING;
                 $('<li>', {'class': 'my'})
                 .append(
-                    $('<div>', {'class': 'inline-3 name'})
+                    $('<div>', {'class': 'inline-2 name'})
                     .append($('<span>', {
                         'text': ' ',
                         'class': 'enter now',
@@ -109,13 +111,19 @@ $(() => {
                 .append(
                     $('<div>', {
                         'text': my_result.text(),
-                        'class': 'inline-3 time'
+                        'class': 'inline-2 time'
                     })
                 )
-                .insertBefore(result.parent())
+                .append(
+                    $('<div>', {
+                        'text': my_error,
+                        'class': 'inline-2 time'
+                    })
+                )
+                .insertBefore(result)
                 .hide().show(500);
 
-                ranks.parent().last().hide(500);
+                ranks.last().hide(500);
                 console.log(ranks);
 
 
@@ -211,9 +219,14 @@ $(() => {
                     $.ajax({
                         'type': 'POST',
                         'dataType': 'text',
-                        'data': {'name': name.text(), 'time': timer.text()},
+                        'data': {'name': name.text(), 'time': timer.text(), 'error': error.text()},
                         'error': (err) => {
-                            console.error(err);
+                            const message = $('<p>', {'text': 'BadRequest!!'});
+                            message.insertAfter($('#info p').last())
+                            .hide().show(500)
+                            .delay(1000, () =>
+                                   $('#rank ol > li:has(span)').css({'color': 'lightgrey'}))
+                            .hide(200, () => message.remove());
                         }
                     });
                 } else if (name.children(':not(.enter):not(.yet)').length < 12) {

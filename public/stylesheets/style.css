@@ -125,6 +125,11 @@ dd, p {
   display: inline-block;
 }
 
+.inline-2 {
+  width: 20%;
+  display: inline-block;
+}
+
 .inline-3 {
   width: 30%;
   display: inline-block;
