@@ -10,6 +10,7 @@ $(() => {
     function getRandomArbitary(min, max) {
         return Math.random() * (max - min) + min;
     }
+
     function isnl(e) {
         if (e.which === 13) {
             return true;
@@ -29,7 +30,10 @@ $(() => {
         return false;
     }
     function isignore(e) {
-        return e.which === 8 || e.which === 32 || e.which == 39 || e.which == 47; // space, quote, slash
+        return e.which === 8    // bs
+            || e.which === 32   // space
+            || e.which === 39   // quote
+            || e.which === 47;  // slash
     }
 
     // =============== ready for start =============== //
