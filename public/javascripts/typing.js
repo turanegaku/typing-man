@@ -89,6 +89,20 @@ $(() => {
         const my_result = $('#time .value');
         const my_record = moment(my_result.text(), 'mm:ss.SS');
         const my_error  = error.text();
+        const my = $('<li>', {'class': 'my'})
+        .append(
+            $('<div>', {
+                'text': my_result.text(),
+                'class': 'inline-2 time'
+            })
+        )
+        .append(
+            $('<div>', {
+                'text': my_error,
+                'class': 'inline-2 time'
+            })
+        );
+        let best = false;
         const ranks = $('#rank ol > li');
         ranks.each((i, r) => {
             const result = $(r);
@@ -96,8 +110,7 @@ $(() => {
             const error = $(r).children('.error');
             if (my_record < record || my_record === record && error >= my_error) {
                 step |= TYPING;
-                $('<li>', {'class': 'my'})
-                .append(
+                my.prepend(
                     $('<div>', {'class': 'inline-2 name'})
                     .append($('<span>', {
                         'text': ' ',
@@ -107,25 +120,13 @@ $(() => {
                         'text': 'your name.',
                         'class': 'yet'
                     }))
-                )
-                .append(
-                    $('<div>', {
-                        'text': my_result.text(),
-                        'class': 'inline-2 time'
-                    })
-                )
-                .append(
-                    $('<div>', {
-                        'text': my_error,
-                        'class': 'inline-2 time'
-                    })
-                )
-                .insertBefore(result)
+                );
+                my.insertBefore(result)
                 .hide().show(500);
+                best = true;
 
                 ranks.last().hide(500);
                 console.log(ranks);
-
 
                 const cookies = {};
                 document.cookie.split('; ').forEach(c => {
@@ -143,6 +144,12 @@ $(() => {
                 return false;
             }
         });
+        if (!best) {
+            my.prepend($('<div>', {'class': 'inline-2 name yet', 'text': 'your record'}))
+            .insertAfter(ranks.last())
+            .delay(3000)
+            .hide(1000, () => my.remove());
+        }
     }
 
     function nextChar() {
@@ -181,6 +188,9 @@ $(() => {
     }
 
     $('html').keypress((e) => {
+        if (e.which == 0) {
+            return true;
+        }
         if (step === CLEAN && !isignore(e)) {
             start_type();
         }
@@ -238,10 +248,9 @@ $(() => {
         }
 
 
+        console.log(e.which);
         if (step & TYPING) {
-            console.log(step & TYPING, step & FINISH);
             if (isignore(e)) { // space, slash
-                // console.log('ignore', e.which);
                 return false;
             }
         }
