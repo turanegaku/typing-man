@@ -1,6 +1,7 @@
 /* global $ location */
 
 $(() => {
+    // =============== useful function =============== //
     function isnl(e) {
         if (e.which === 13) {
             return true;
@@ -11,16 +12,24 @@ $(() => {
         return false;
     }
     function isback(e) {
-        if (e.which == 8) {
+        if (e.which === 8) {
             return true;
         }
-        if (e.ctrlKey && e.which == 104) {
+        if (e.ctrlKey && e.which === 104) {
             return true;
         }
         return false;
     }
+    function isignore(e) {
+        return e.which === 8    // bs
+            || e.which === 32   // space
+            || e.which === 39   // quote
+            || e.which === 47;  // slash
+    }
 
-    $('#question :not(:has(p))').contents()
+    // =============== ready for start =============== //
+    // wrap all char in selection with span
+    $('#selection :not(:has(p))').contents()
     .filter((_, t) => {
         return t.nodeType === 3;
     }).each((i, txt) => {
@@ -28,51 +37,49 @@ $(() => {
                            .replace(/(.)/g, '<span>$1</span>'));
     });
 
-    const questions = $('#question a > span:first-child');
-    questions.css({'text-decoration': 'underline'});
 
-    questions
-    .before($('<span>'));
-    $('#question a span:last-child')
-    .after($('<span>'));
+    const sel_f = $('#selection a > span:first-child');
+    const sel_l = $('#selection a > span:last-child');
 
-    const all = $('#question a > span');
+    sel_f.before($('<span>', {'class': 'done'}));
+    sel_l.after ($('<span>', {'class': 'done'}));
 
-    questions.each((i, q) => {
-        let question = $(q);
-        const parent = question.parent();
+    const selections = sel_f;
+    const all = $('#selection a > span');
+
+    selections.each((i, q) => {
+        let selection = $(q);
+        const parent = selection.parent();
         const siblings = parent.children();
-        console.log(siblings);
 
         $('html').keypress((e) => {
-            if (question.text() === String.fromCharCode(e.which)) {
-                question.addClass('done');
-                question = question.next();
-                question.css({'text-decoration': 'underline'});
+            if (isback(e)) {
+                if (selection.prev().prev().length) {
+                    parent.removeAttr('href');
+                    all.removeClass('movable');
 
-                if (!question.next().length) {              // done sentence
+                    selection = selection.prev();
+                    selection.removeClass('done');
+                }
+            } else if (selection.text() === String.fromCharCode(e.which)) {
+                selection.addClass('done');
+                selection = selection.next();
+
+                if (!selection.next().length) {              // done sentence
                     parent.attr('href', parent.text());     // click able
                     all.removeClass('movable');        // remove other
                     siblings.addClass('movable');           // add self
                 }
             }
 
-            if (isback(e)) {
-                if (question.prev().prev().length) {
-                    parent.removeAttr('href');
-                    all.removeClass('movable');
-
-                    question.css({'text-decoration': 'none'});
-                    question = question.prev();
-                    question.removeClass('done');
-                }
-                return false;   // avoid page back
+            if (isignore(e)) {
+                return false;
             }
         });
     });
 
     $('html').keypress((e) => {
-        const link = $('#question a:has(span.movable)');
+        const link = $('#selection a:has(span.movable)');
         if (isnl(e) && link.length) {
             location.href = link.text();
         }

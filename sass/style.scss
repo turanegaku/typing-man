@@ -38,9 +38,16 @@ header h1 a {
     color: crimson;
     background-color: lavenderblush;
   }
+}
+
+#selection span {
   &.movable {
     color: blue;
     font-size: 2.1vw;
+  }
+
+  &.done + span:not(.done) {
+    text-decoration: underline;
   }
 }
 

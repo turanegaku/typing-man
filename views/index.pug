@@ -3,10 +3,11 @@ extends layout
 block info
   p 問題を選択してね
 
-block question
-  for man in mans
-    p.inline-3
-      a= man
+block content
+  #selection
+    for man in mans
+      p.inline-3
+        a= man
 
 block script
   script(type='text/javascript', src='/javascripts/selection.js')
