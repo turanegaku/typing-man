@@ -1,23 +1,27 @@
 const gulp = require('gulp');
 const sass = require('gulp-sass');
 
-gulp.task('lib', ['js', 'css', 'fonts']);
+const paths = {
+    'sass_src': './sass/**/*.scss',
+    'sass_dst': './public/stylesheets',
+    'lib_dst': './static/js',
+};
 
-gulp.task('js', () => {
+gulp.task('lib', () => {
     gulp.src([
         'node_modules/jquery/dist/jquery.min.js',
         'node_modules/jquery.easing/jquery.easing.min.js',
         'node_modules/moment/min/moment.min.js'
     ])
-    .pipe(gulp.dest('static/js'));
+    .pipe(gulp.dest(paths.lib_dst));
 });
 
 gulp.task('sass', () => {
-    return gulp.src('./sass/**/*.scss')
+    return gulp.src(paths.sass_src)
     .pipe(sass({'outputStyle': 'expanded'}).on('error', sass.logError))
-    .pipe(gulp.dest('./public/stylesheets'));
+    .pipe(gulp.dest(paths.sass_dst));
 });
 
 gulp.task('sass:watch', () => {
-    gulp.watch('./sass/**/*.scss', ['sass']);
+    gulp.watch(paths.sass_src, ['sass']);
 });
