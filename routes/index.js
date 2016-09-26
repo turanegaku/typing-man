@@ -16,7 +16,7 @@ fs.readdir('./views/mans', (err, files) => {
 
 db = new sqlite3.Database('./database.sqlite3');
 db.serialize(() => {
-    db.run('CREATE TABLE record (date INTEGER, man TEXT, name TEXT, time INTEGER)',
+    db.run('CREATE TABLE record (date INTEGER, man TEXT, name TEXT, time INTEGER, error INTEGER)',
            () => {}); // table exist error cushion
 });
 db.close();
@@ -34,25 +34,33 @@ router.get('/:man', (req, res, next) => {
     }
     const ranks = new Array();
     db = new sqlite3.Database('./database.sqlite3');
-    // db.each('SELECT * FROM record WHERE man == ?', trg, (err, row) => {
-    //     console.log(row);
-    //     ranks.push({'name': row.name, 'time': moment(row.time).format('mm:ss.SS')});
-    //     if (err) {
-    //         console.error(err);
-    //     }
-    // });
-    db.all('SELECT * FROM record WHERE man == ? ORDER BY time, date DESC LIMIT 10', trg, (err, rows) => {
+    db.all('SELECT * FROM record WHERE man == ? ORDER BY time, error, date DESC LIMIT 10', trg, (err, rows) => {
         if (err) {
             console.error(err);
             res.end('error');
             return;
         }
-        rows.forEach(row => {
-            ranks.push({'name': row.name, 'time': moment(row.time).format('mm:ss.SS')});
+        for (let i = 0; i < 10; ++i) {
+            ranks.push({
+                'name': 'NoData',
+                'time': moment(30 * 60 * 1000).format('mm:ss.SS'),
+                'error': 0,
+            });
+        }
+        rows.forEach((row, i) => {
+            ranks[i] = {
+                'name': row.name,
+                'time': moment(row.time).format('mm:ss.SS'),
+                'error': row.error,
+            };
         });
 
         while (ranks.length < 10) {
-            ranks.push({'name': 'NoData', 'time': moment(30 * 60 * 1000).format('mm:ss.SS')});
+            ranks.push({
+                'name': 'NoData',
+                'time': moment(30 * 60 * 1000).format('mm:ss.SS'),
+                'error': 0,
+            });
         }
 
         res.render('mans/' + trg, {
@@ -67,21 +75,22 @@ router.get('/:man', (req, res, next) => {
 router.post('/:man', (req, res, next) => {
     const trg = req.params.man;
     if (mans.indexOf(trg) < 0) {
-        res.end('invarid');
+        // next();
         return;
     }
 
     const name = req.body.name;
     const time = moment(req.body.time, 'mm:ss.SS') - moment('0', 'm');
-    console.log(trg, name, time);
+    const error = req.body.error;
+    console.log(req.body);
     let valid = true;
-    if (name.length > 12 || time < 0) {
+    if (!name || !time || !error || name.length > 12 || time < 0 || error < 0) {
         valid = false;
     }
 
     if (valid) {
         db = new sqlite3.Database('./database.sqlite3');
-        db.run('INSERT INTO record VALUES(?, ?, ?, ?)', moment().unix(), trg, name, time, (err) => {
+        db.run('INSERT INTO record VALUES(?, ?, ?, ?, ?)', moment().unix(), trg, name, time, error, (err) => {
             if (err) {
                 console.error(err);
                 valid = false;
@@ -94,6 +103,7 @@ router.post('/:man', (req, res, next) => {
         res.cookie('name', name);
         res.end('ok');
     } else {
+        res.status(400);
         res.end('invalid');
         return;
     }
