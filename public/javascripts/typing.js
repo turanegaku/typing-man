@@ -299,6 +299,7 @@ $(() => {
 
     $('#option button#restart').click(() => {
         initialize();
+        question.focus();
     });
 
     $('#option button#review').click(() => {
