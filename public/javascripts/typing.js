@@ -1,4 +1,4 @@
-/* global $ moment document */
+/* global $ moment document window */
 
 $(() => {
     // =============== constant =============== //
@@ -51,27 +51,57 @@ $(() => {
     // append enter dummy span after end of sentence
     $('#question span:last-child')
     .after('<span class="enter"> </span>');
+
+    // get cookie name
+    const cookies = {};
+    document.cookie.split('; ').forEach(c => {
+        const str = c.split('=');
+        cookies[str[0]] = str[1];
+    });
     // =============== ready for start =============== //
 
     const questions = $('#question span:not(:has(*))'); // all of char
-    const itr_question = questions[Symbol.iterator]();  // iterator for all of char
-    const miss = $('#miss');                            // collection for misstype chars
 
-    const error = $('#error .value');
-    const timer = $('#time .value');
+    const miss  = $('#miss');                           // collection for misstype chars
+    const rank  = $('#rank');                        // record ranking
+    const error = $('#error .value');                   // typo cunter
+    const timer = $('#time .value');                    // timer
+
+    let itr_question;   // iterator for all of char
+    let question;       // now char should type
+
+    let step;
+    let start_time;
+    let interval_id;
+    let reviewal_id;
+
+    initialize();
+
+    function initialize() {
+        step = CLEAN;
+
+        clearInterval(interval_id);
+        clearInterval(reviewal_id);
+        start_time = moment();
+        updateTimer();
+
+        questions.removeClass('done miss now');
+        questions.css('opacity', '');
+
+        itr_question = questions[Symbol.iterator]();  // iterator for all of char
+        question = $(itr_question.next().value);        // now char should type
+        question.addClass('now');
+
+        miss.children().remove();
+
+        $('#option button#review').attr('disabled', 'disabled');
+        rank.find('li.my').removeClass('my');
+    }
 
     function updateTimer() {
         const t = moment(moment() - start_time).format('mm:ss.SS');
         timer.text(t);
     }
-
-
-    let question = $(itr_question.next().value);        // now char should type
-    question.addClass('now');
-
-    let step = CLEAN;
-    let start_time;
-    let interval_id;
 
     function start_type() {
         step |= TYPING;
@@ -103,12 +133,13 @@ $(() => {
             })
         );
         let best = false;
-        const ranks = $('#rank ol > li');
+        const ranks = rank.find('ol > li');
         ranks.each((i, r) => {
             const result = $(r);
             const record = moment(result.children('.time').text(), 'mm:ss.SS');
             const error = $(r).children('.error');
-            if (my_record < record || my_record === record && error >= my_error) {
+            console.log(my_record < record, my_record - record === 0, +my_error <= +error.text());
+            if (my_record < record || my_record - record === 0 && +my_error <= +error.text()) {
                 step |= TYPING;
                 my.prepend(
                     $('<div>', {'class': 'inline-2 name'})
@@ -125,21 +156,17 @@ $(() => {
                 .hide().show(500);
                 best = true;
 
-                ranks.last().hide(500);
-                console.log(ranks);
+                ranks.last().hide(500, () => ranks.last().remove());
 
-                const cookies = {};
-                document.cookie.split('; ').forEach(c => {
-                    const str = c.split('=');
-                    cookies[str[0]] = str[1];
-                });
                 if (cookies.name) {
                     for (let i = 0; i < cookies.name.length; ++i) {
-                        $('#rank ol > li.my .name .enter').before(
+                        rank.find('ol > li.my .name .enter').before(
                             $('<span>', {'text': cookies.name[i]})
                         );
                     }
                 }
+
+                $('#option button#restart').attr('disabled', 'disabled');
 
                 return false;
             }
@@ -149,6 +176,18 @@ $(() => {
             .insertAfter(ranks.last())
             .delay(3000)
             .hide(1000, () => my.remove());
+
+            $.ajax({
+                'type': 'POST',
+                'dataType': 'text',
+                'data': {'name': cookies.name, 'time': timer.text(), 'error': error.text()},
+            });
+
+            $('#option button#review').removeAttr('disabled');
+        }
+
+        if (rank.offset().top + rank.height() > $(window).height()) {
+            $('body,html').animate({'scrollTop': rank.offset().top}, 800, 'swing');
         }
     }
 
@@ -218,7 +257,7 @@ $(() => {
                     .append(question.clone().text(String.fromCharCode(e.which)));   // add miss
                 }
             } else {
-                const name = $('#rank ol > li.my .name');
+                const name = rank.find('ol > li.my .name');
                 if (isback(e)) {
                     if (name.children(':not(.enter):not(.yet)').length) {
                         name.children(':not(.enter):not(.yet)').last().remove();    // delete miss
@@ -235,10 +274,12 @@ $(() => {
                             message.insertAfter($('#info p').last())
                             .hide().show(500)
                             .delay(1000, () =>
-                                   $('#rank ol > li:has(span)').css({'color': 'lightgrey'}))
+                                   rank.find('ol > li.my').css({'color': 'lightgrey'}))
                             .hide(200, () => message.remove());
                         }
                     });
+
+                    $('#option button').removeAttr('disabled');
                 } else if (name.children(':not(.enter):not(.yet)').length < 12) {
                     name.children('.enter').before(
                         $('<span>', {'text': String.fromCharCode(e.which)})
@@ -254,6 +295,38 @@ $(() => {
                 return false;
             }
         }
+    });
+
+    $('#option button#restart').click(() => {
+        initialize();
+    });
+
+    $('#option button#review').click(() => {
+        $('#option button#review').attr('disabled', 'disabled');
+        start_time = moment();
+        questions.removeClass('done');
+
+        const itr = questions[Symbol.iterator]();  // iterator for all of char
+        let q = $(itr.next().value);        // now char should type
+        q.addClass('now');
+
+        const t = timer.text();
+
+        reviewal_id = setInterval(() => {
+            updateTimer();
+            if (+q.attr('time') < moment() - start_time) {
+                q.addClass('done');
+                q.removeClass('now');
+                const nq = itr.next();
+                if (nq.done) {
+                    $('#option button#review').removeAttr('disabled');
+                    clearInterval(reviewal_id);
+                    timer.text(t);
+                }
+                q = $(nq.value);
+                q.addClass('now');
+            }
+        }, 50);
     });
 });
 
