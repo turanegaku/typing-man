@@ -15,7 +15,7 @@ $(() => {
         if (e.which === 13) {
             return true;
         }
-        if (e.ctrlKey && e.which === 109) {
+        if (e.ctrlKey && (e.which === 77 || e.which === 109)) {
             return true;
         }
         return false;
@@ -24,7 +24,7 @@ $(() => {
         if (e.which === 8) {
             return true;
         }
-        if (e.ctrlKey && e.which === 104) {
+        if (e.ctrlKey && (e.which === 72 || e.which === 104)) {
             return true;
         }
         return false;
@@ -226,35 +226,19 @@ $(() => {
         }
     }
 
-    $('html').keypress((e) => {
-        if (e.which == 0) {
-            return true;
-        }
-        if (step === CLEAN && !isignore(e)) {
-            start_type();
-        }
-
+    $('html').keydown(e => {
         if (step & TYPING) {
             if (!(step & FINISH)) {
                 if (isback(e)) {
                     if (miss.children().length) {
                         miss.children().last().remove();    // delete miss
                     }
+                    return false;
                 } else if (isnl(e)) {
                     if (!question.next().length) {
                         nextChar();
                     }
-                } else if (question.text() === String.fromCharCode(e.which)) {   // incorrect type
-                    if (!miss.children().length && question.next().length) {
-                        nextChar();
-                    }
-                } else {                                // incorrect type
-                    error.text(+error.text() + 1);              // increment miss count
-                    question.addClass('miss');
-
-                    const p = question.position();
-                    miss.css({'left': p.left, 'top': p.top})                        // set position
-                    .append(question.clone().text(String.fromCharCode(e.which)));   // add miss
+                    return false;
                 }
             } else {
                 const name = rank.find('ol > li.my .name');
@@ -262,6 +246,7 @@ $(() => {
                     if (name.children(':not(.enter):not(.yet)').length) {
                         name.children(':not(.enter):not(.yet)').last().remove();    // delete miss
                     }
+                    return false;
                 } else if (isnl(e)) {
                     step &= ~TYPING;
                     name.children('.enter, .yet').remove();    // delete miss
@@ -280,7 +265,36 @@ $(() => {
                     });
 
                     $('#option button').removeAttr('disabled');
-                } else if (name.children(':not(.enter):not(.yet)').length < 12) {
+                }
+            }
+        }
+    });
+
+    $('html').keypress(e => {
+        if (e.which == 0) {
+            return true;
+        }
+        if (step === CLEAN && !isignore(e)) {
+            start_type();
+        }
+
+        if (step & TYPING) {
+            if (!(step & FINISH)) {
+                if (question.text() === String.fromCharCode(e.which)) {     // incorrect type
+                    if (!miss.children().length && question.next().length) {
+                        nextChar();
+                    }
+                } else {                                                    // incorrect type
+                    error.text(+error.text() + 1);                          // increment miss count
+                    question.addClass('miss');
+
+                    const p = question.position();
+                    miss.css({'left': p.left, 'top': p.top})                        // set position
+                    .append(question.clone().text(String.fromCharCode(e.which)));   // add miss
+                }
+            } else {
+                const name = rank.find('ol > li.my .name');
+                if (name.children(':not(.enter):not(.yet)').length < 12) {
                     name.children('.enter').before(
                         $('<span>', {'text': String.fromCharCode(e.which)})
                     );
@@ -289,7 +303,6 @@ $(() => {
         }
 
 
-        console.log(e.which);
         if (step & TYPING) {
             if (isignore(e)) { // space, slash
                 return false;
