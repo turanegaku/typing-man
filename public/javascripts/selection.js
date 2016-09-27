@@ -6,7 +6,7 @@ $(() => {
         if (e.which === 13) {
             return true;
         }
-        if (e.ctrlKey && e.which === 109) {
+        if (e.ctrlKey && (e.which === 77 || e.which === 109)) {
             return true;
         }
         return false;
@@ -15,7 +15,7 @@ $(() => {
         if (e.which === 8) {
             return true;
         }
-        if (e.ctrlKey && e.which === 104) {
+        if (e.ctrlKey && (e.which === 72 || e.which === 104)) {
             return true;
         }
         return false;
@@ -52,7 +52,7 @@ $(() => {
         const parent = selection.parent();
         const siblings = parent.children();
 
-        $('html').keypress((e) => {
+        $('html').keydown(e => {
             if (isback(e)) {
                 if (selection.prev().prev().length) {
                     parent.removeAttr('href');
@@ -61,7 +61,12 @@ $(() => {
                     selection = selection.prev();
                     selection.removeClass('done');
                 }
-            } else if (selection.text() === String.fromCharCode(e.which)) {
+                return false;
+            }
+        });
+
+        $('html').keypress(e => {
+            if (selection.text() === String.fromCharCode(e.which)) {
                 selection.addClass('done');
                 selection = selection.next();
 
