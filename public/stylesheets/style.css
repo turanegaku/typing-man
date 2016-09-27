@@ -78,6 +78,14 @@ header h1 a {
   visibility: hidden;
 }
 
+#rank ol li.my {
+  background-color: mistyrose;
+}
+
+#rank ol li.my div {
+  font-size: 2.5vw;
+}
+
 #rank ol li.my .name span:nth-child(12) {
   text-decoration: underline;
 }
@@ -86,19 +94,33 @@ header h1 a {
   visibility: hidden;
 }
 
-button.invert {
-  cursor: pointer;
+button.default {
   font-size: 2vw;
-  background: darkslategrey;
-  color: azure;
-  border-style: None;
-  padding: 5px;
-  margin: 2px;
-  box-shadow: 1px 1px 2px 1px #666;
+  cursor: pointer;
+  color: #333;
+  background-color: #fff;
+  padding: 6px 12px;
+  margin: 5px;
+  border: 1px solid transparent;
+  border-color: #ccc;
+  border-radius: 4px;
 }
 
-button.invert:hover {
-  background: black;
+button.default:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: .65;
+}
+
+button.default:not(:disabled):hover {
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+
+button.default:not(:disabled):active {
+  background-color: #dfdfdf;
+  border-color: #8c8c8c;
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.12);
 }
 
 .tab {
