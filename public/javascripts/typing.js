@@ -56,6 +56,8 @@ $(() => {
 
 
     let username = $('header .username').text();
+
+
     // =============== main function =============== //
     const questions = $('#question span:not(:has(*))'); // all of char
 
