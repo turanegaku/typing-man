@@ -35,6 +35,24 @@ header h1 a {
   text-decoration: underline;
 }
 
+.ring {
+  background: rgba(255, 255, 224, 0.8);
+  position: absolute;
+  border-radius: 100px;
+  height: 40px;
+  width: 40px;
+  margin: -20px;
+  animation: pulsate 2s ease-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes pulsate {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
 #question {
   background-color: rgba(240, 248, 255, 0.3);
   padding: 20px;
@@ -47,9 +65,18 @@ header h1 a {
   background-color: lavenderblush;
 }
 
+#selection span {
+  transition: font-size .3s;
+}
+
+#selection span:not(.done) {
+  color: grey;
+}
+
 #selection span.movable {
+  transition: font-size .3s;
   color: blue;
-  font-size: 2.1vw;
+  font-size: 2.5vw;
 }
 
 #selection span.done + span:not(.done) {
@@ -85,12 +112,15 @@ header h1 a {
   visibility: hidden;
 }
 
-#rank ol li.my {
-  background-color: mistyrose;
+#rank ol li:not(.my) {
+  transition: all .2s;
 }
 
-#rank ol li.my div {
+#rank ol li.my {
+  background-color: mistyrose;
   font-size: 2.5vw;
+}
+
 #rank ol li.my.out {
   margin-top: 20px;
   list-style-type: none;

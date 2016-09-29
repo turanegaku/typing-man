@@ -72,6 +72,8 @@ $(() => {
     let interval_id;
     let reviewal_id;
 
+    const appeal = $('<div>', {'class': 'ring'});
+
     initialize();
 
     function initialize() {
@@ -92,7 +94,7 @@ $(() => {
         miss.children().remove();
 
         $('#option button#review').attr('disabled', 'disabled');
-        rank.find('li.my').removeClass('my');
+        question.append(appeal);
     }
 
     function updateTimer() {
@@ -104,6 +106,7 @@ $(() => {
         step |= TYPING;
         start_time = moment();
         interval_id = setInterval(updateTimer, 50);
+        appeal.remove();
     }
 
     function finish_type() {

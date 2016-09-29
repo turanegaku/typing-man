@@ -27,10 +27,25 @@ header h1 a {
   background-color: crimson;
 }
 .done {
-    color: springgreen;
+  color: springgreen;
 }
 .now {
-    text-decoration: underline;
+  text-decoration: underline;
+}
+
+.ring {
+  background: rgba(lightyellow, .8);
+  position: absolute;
+  border-radius: 100px;
+  height: 40px;
+  width: 40px;
+  margin: -20px;
+
+  animation: pulsate 2s ease-out;
+  animation-iteration-count: infinite;
+}
+@keyframes pulsate {
+  to { transform: scale(4); opacity: 0; }
 }
 
 #question {
@@ -45,14 +60,23 @@ header h1 a {
   }
 }
 
-#selection span {
-  &.movable {
-    color: blue;
-    font-size: 2.1vw;
-  }
+#selection {
+  span {
+    transition: font-size .3s;
 
-  &.done + span:not(.done) {
-    text-decoration: underline;
+    &:not(.done) {
+      color: grey;
+    }
+
+    &.movable {
+      transition: font-size .3s;
+      color: blue;
+      font-size: 2.5vw;
+    }
+
+    &.done + span:not(.done) {
+      text-decoration: underline;
+    }
   }
 }
 
@@ -79,7 +103,6 @@ header h1 a {
 #rank ol li {
   white-space: pre;
 
-
   .yet {
       opacity: .5;
   }
@@ -87,11 +110,17 @@ header h1 a {
       visibility: hidden;
   }
 
+  &:not(.my) {
+    transition: all .2s;
+  }
+
   &.my {
     background-color: mistyrose;
+    font-size: 2.5vw;
 
-    div {
-      font-size: 2.5vw;
+    &.out {
+      margin-top: 20px;
+      list-style-type: none;
     }
 
     .name span {
