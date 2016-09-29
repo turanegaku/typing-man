@@ -65,21 +65,21 @@ header h1 a {
   background-color: lavenderblush;
 }
 
-#selection span {
-  transition: font-size .3s;
-}
-
-#selection span:not(.done) {
-  color: grey;
-}
-
-#selection span.movable {
+#selection a.movable span {
   transition: font-size .3s;
   color: blue;
   font-size: 2.5vw;
 }
 
-#selection span.done + span:not(.done) {
+#selection a:not(.movable) span {
+  transition: font-size .3s;
+}
+
+#selection a:not(.movable) span:not(.done) {
+  color: grey;
+}
+
+#selection a:not(.movable) span.done + span:not(.done) {
   text-decoration: underline;
 }
 
