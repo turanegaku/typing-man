@@ -33,8 +33,13 @@ header h1 a {
     text-decoration: underline;
 }
 
-#question span {
-  &.miss {
+#question {
+  background-color: rgba(aliceblue, .3);
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 5px;
+
+  span.miss {
     color: crimson;
     background-color: lavenderblush;
   }
