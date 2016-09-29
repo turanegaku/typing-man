@@ -221,7 +221,7 @@ $(() => {
                     }
                     return false;
                 } else if (isnl(e)) {
-                    if (!question.next().length) {
+                    if (!miss.children().length && !question.next().length) {
                         nextChar();
                     }
                     return false;
