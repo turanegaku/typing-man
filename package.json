@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "forever ./bin/www",
+    "watch": "forever -w ./bin/www",
     "dev": "node-dev ./bin/www"
   },
   "dependencies": {
