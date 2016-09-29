@@ -36,14 +36,19 @@ header h1 a {
 }
 
 .ring {
-  background: rgba(255, 255, 224, 0.8);
+  background: rgba(65, 105, 225, 0.4);
+  border: solid;
+  border-color: royalblue;
+  border-width: 1px;
   position: absolute;
   border-radius: 100px;
-  height: 40px;
-  width: 40px;
-  margin: -20px;
-  animation: pulsate 2s ease-out;
-  animation-iteration-count: infinite;
+  height: 10px;
+  width: 10px;
+  margin-top: -15px;
+  margin-left: -2px;
+  transform: scale(0);
+  animation: pulsate 1s ease-out;
+  animation-iteration-count: 3;
 }
 
 @keyframes pulsate {
@@ -63,6 +68,15 @@ header h1 a {
 #question span.miss {
   color: crimson;
   background-color: lavenderblush;
+}
+
+#selection a:not([href]) {
+  transition: padding .5s, margin .5s, border .5s;
+}
+
+#selection a[href] {
+  transition: padding .5s, margin .5s, border .5s;
+  text-decoration-line: none;
 }
 
 #selection a.movable span {
@@ -134,7 +148,7 @@ header h1 a {
   visibility: hidden;
 }
 
-button.default {
+button.default, #selection a[href] {
   font-size: 2vw;
   cursor: pointer;
   color: #333;
@@ -146,18 +160,18 @@ button.default {
   border-radius: 4px;
 }
 
-button.default:disabled {
+button.default:disabled, #selection a[href]:disabled {
   cursor: not-allowed;
   box-shadow: none;
   opacity: .65;
 }
 
-button.default:not(:disabled):hover {
+button.default:not(:disabled):hover, #selection a[href]:not(:disabled):hover {
   background-color: #e6e6e6;
   border-color: #adadad;
 }
 
-button.default:not(:disabled):active {
+button.default:not(:disabled):active, #selection a[href]:not(:disabled):active {
   background-color: #dfdfdf;
   border-color: #8c8c8c;
   box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.12);

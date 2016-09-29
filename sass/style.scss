@@ -34,15 +34,20 @@ header h1 a {
 }
 
 .ring {
-  background: rgba(lightyellow, .8);
+  background: rgba(royalblue, .4);
+  border: solid;
+  border-color: royalblue;
+  border-width: 1px;
   position: absolute;
   border-radius: 100px;
-  height: 40px;
-  width: 40px;
-  margin: -20px;
+  height: 10px;
+  width: 10px;
+  margin-top: -15px;
+  margin-left: -2px;
+  transform: scale(0);
 
-  animation: pulsate 2s ease-out;
-  animation-iteration-count: infinite;
+  animation: pulsate 1s ease-out;
+  animation-iteration-count: 3;
 }
 @keyframes pulsate {
   to { transform: scale(4); opacity: 0; }
@@ -61,6 +66,16 @@ header h1 a {
 }
 
 #selection {
+  a:not([href]) {
+    transition: padding .5s, margin .5s, border .5s;
+  }
+
+  a[href] {
+    transition: padding .5s, margin .5s, border .5s;
+    text-decoration-line: none;
+    @extend button.default;
+  }
+
   a.movable span {
     transition: font-size .3s;
     color: blue;
