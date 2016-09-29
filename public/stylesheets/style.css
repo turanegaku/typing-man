@@ -84,6 +84,9 @@ header h1 a {
 
 #rank ol li.my div {
   font-size: 2.5vw;
+#rank ol li.my.out {
+  margin-top: 20px;
+  list-style-type: none;
 }
 
 #rank ol li.my .name span:nth-child(12) {

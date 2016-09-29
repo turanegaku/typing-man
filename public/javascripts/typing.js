@@ -111,7 +111,6 @@ $(() => {
 
     function finish_type() {
         step |= FINISH;
-        step &= ~TYPING;
         clearInterval(interval_id);
         updateTimer();
         questions.animate({'opacity': 1}, 'slow', 'easeInQuad');
@@ -120,6 +119,17 @@ $(() => {
         const my_record = moment(my_result.text(), 'mm:ss.SS');
         const my_error  = error.text();
         const my = $('<li>', {'class': 'my'})
+        .append(
+            $('<div>', {'class': 'inline-2 name'})
+            .append($('<span>', {
+                'text': ' ',
+                'class': 'enter now',
+            }))
+            .append($('<span>', {
+                'text': 'your name.',
+                'class': 'yet'
+            }))
+        )
         .append(
             $('<div>', {
                 'text': my_result.text(),
@@ -140,18 +150,6 @@ $(() => {
             const error = $(r).children('.error');
             console.log(my_record < record, my_record - record === 0, +my_error <= +error.text());
             if (my_record < record || my_record - record === 0 && +my_error <= +error.text()) {
-                step |= TYPING;
-                my.prepend(
-                    $('<div>', {'class': 'inline-2 name'})
-                    .append($('<span>', {
-                        'text': ' ',
-                        'class': 'enter now',
-                    }))
-                    .append($('<span>', {
-                        'text': 'your name.',
-                        'class': 'yet'
-                    }))
-                );
                 my.insertBefore(result)
                 .hide().show(500);
                 best = true;
@@ -172,18 +170,9 @@ $(() => {
             }
         });
         if (!best) {
-            my.prepend($('<div>', {'class': 'inline-2 name yet', 'text': 'your record'}))
+            my.addClass('out')
             .insertAfter(ranks.last())
-            .delay(3000)
-            .hide(1000, () => my.remove());
-
-            $.ajax({
-                'type': 'POST',
-                'dataType': 'text',
-                'data': {'name': cookies.name, 'time': timer.text(), 'error': error.text()},
-            });
-
-            $('#option button#review').removeAttr('disabled');
+            .hide().show(500);
         }
 
         if (rank.offset().top + rank.height() > $(window).height()) {
@@ -264,7 +253,12 @@ $(() => {
                         }
                     });
 
+                    username = name.text();
                     $('#option button').removeAttr('disabled');
+                    const out = rank.find('ol > li.my.out');
+                    out.hide(200, () => out.remove());
+                    rank.find('li.my').removeClass('my');
+                    return false;
                 }
             }
         }
