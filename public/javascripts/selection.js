@@ -45,12 +45,11 @@ $(() => {
     sel_l.after ($('<span>', {'class': 'done'}));
 
     const selections = sel_f;
-    const all = $('#selection a > span');
+    const all = $('#selection a');
 
     selections.each((i, q) => {
         let selection = $(q);
         const parent = selection.parent();
-        const siblings = parent.children();
 
         $('html').keydown(e => {
             if (isback(e)) {
@@ -73,7 +72,7 @@ $(() => {
                 if (!selection.next().length) {              // done sentence
                     parent.attr('href', parent.text());     // click able
                     all.removeClass('movable');        // remove other
-                    siblings.addClass('movable');           // add self
+                    parent.addClass('movable');           // add self
                 }
             }
 
@@ -84,7 +83,7 @@ $(() => {
     });
 
     $('html').keypress((e) => {
-        const link = $('#selection a:has(span.movable)');
+        const link = $('#selection a.movable');
         if (isnl(e) && link.length) {
             location.href = link.text();
         }

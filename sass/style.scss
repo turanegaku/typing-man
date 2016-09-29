@@ -61,17 +61,17 @@ header h1 a {
 }
 
 #selection {
-  span {
+  a.movable span {
+    transition: font-size .3s;
+    color: blue;
+    font-size: 2.5vw;
+  }
+
+  a:not(.movable) span {
     transition: font-size .3s;
 
     &:not(.done) {
       color: grey;
-    }
-
-    &.movable {
-      transition: font-size .3s;
-      color: blue;
-      font-size: 2.5vw;
     }
 
     &.done + span:not(.done) {
