@@ -24,14 +24,15 @@ block content
   #rank
     h3 ランキング
     ol(style='font-size: 2vw;')
-      for rank in ranks
+      each rank in ranks
         li
           .inline-2.name!= rank.name
-          .inline-2.time= rank.time
+          .inline-2.time(t= rank.time)= rank.timer
           .inline-1.error= rank.error
 
   #drop
   #miss
 
 block script
+  script(type='text/javascript', src='/socket.io/socket.io.js')
   script(type='text/javascript', src='/javascripts/typing.js')

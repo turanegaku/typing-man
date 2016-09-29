@@ -1,4 +1,4 @@
-/* global $ moment document window */
+/* global $ moment window location io */
 
 $(() => {
     // =============== constant =============== //
@@ -71,6 +71,7 @@ $(() => {
 
     let step;
     let start_time;
+    let end_time;
     let interval_id;
     let reviewal_id;
 
@@ -96,12 +97,13 @@ $(() => {
         miss.children().remove();
 
         $('#option button#review').attr('disabled', 'disabled');
+        $('#option button#restart').removeAttr('disabled');
         question.append(appeal);
     }
 
     function updateTimer() {
-        const t = moment(moment() - start_time).format('mm:ss.SS');
-        timer.text(t);
+        end_time = moment();
+        timer.text(moment(end_time - start_time).format('mm:ss.SS'));
     }
 
     function start_type() {
@@ -116,70 +118,89 @@ $(() => {
         clearInterval(interval_id);
         updateTimer();
         questions.animate({'opacity': 1}, 'slow', 'easeInQuad');
+        $('#option button#restart').attr('disabled', 'disabled');
 
-        const my_result = $('#time .value');
-        const my_record = moment(my_result.text(), 'mm:ss.SS');
-        const my_error  = error.text();
-        const my = $('<li>', {'class': 'my'})
-        .append(
-            $('<div>', {'class': 'inline-2 name'})
-            .append($('<span>', {
-                'text': ' ',
-                'class': 'enter now',
-            }))
-            .append($('<span>', {
-                'text': 'your name.',
-                'class': 'yet'
-            }))
-        )
-        .append(
-            $('<div>', {
-                'text': my_result.text(),
-                'class': 'inline-2 time'
-            })
-        )
-        .append(
-            $('<div>', {
-                'text': my_error,
-                'class': 'inline-2 time'
-            })
-        );
-
+        const name = new Array();
         if (username) {
             for (let i = 0; i < username.length; ++i) {
-                my.find('.name .enter').before(
+                name.push(
                     $('<span>', {'text': username[i]})
                 );
             }
         }
+        name.push($('<span>', {
+            'text': ' ',
+            'class': 'enter now',
+        }));
+        name.push($('<span>', {
+            'text': 'your name.',
+            'class': 'yet'
+        }));
 
-        let best = false;
-        const ranks = rank.find('ol > li');
-        ranks.each((i, r) => {
-            const result = $(r);
-            const record = moment(result.children('.time').text(), 'mm:ss.SS');
-            const error = $(r).children('.error');
-            if (my_record < record || my_record - record === 0 && +my_error <= +error.text()) {
-                my.insertBefore(result)
-                .hide().show(500);
-                best = true;
-
-                ranks.last().hide(500, () => ranks.last().remove());
-
-                $('#option button#restart').attr('disabled', 'disabled');
-
-                return false;
-            }
-        });
-        if (!best) {
-            my.addClass('out')
-            .insertAfter(ranks.last())
+        const my = newRecord({
+            'name': name,
+            'time': end_time - start_time,
+            'error': +error.text(),
+        }, true);
+        if (my.hasClass('out')) {
+            my.insertAfter(rank.find('ol > li').last())
             .hide().show(500);
         }
 
         if (rank.offset().top + rank.height() > $(window).height()) {
             $('body,html').animate({'scrollTop': rank.offset().top}, 800, 'swing');
         }
+    }
+
+    function newRecord(result, my) {
+        const dom = $('<li>')
+        .append(
+            $('<div>', {
+                'class': 'inline-2 name'
+            })
+            .append(result.name)
+        )
+        .append(
+            $('<div>', {
+                't': result.time,
+                'text': moment(+result.time).format('mm:ss.SS'),
+                'class': 'inline-2 time'
+            })
+        )
+        .append(
+            $('<div>', {
+                'text': result.error,
+                'class': 'inline-2 time'
+            })
+        );
+        if (my) {
+            dom.addClass('my');
+        }
+
+        let best = false;
+        const ranks = rank.find('ol > li:not(.out)');
+        console.log(ranks);
+        ranks.each((i, r) => {
+            const record = $(r);
+            const time = record.children('.time').attr('t');
+            const error = record.children('.error');
+            if (result.time < time || result.time - time === 0 && +result.error <= +error.text()) {
+                dom.insertBefore(record)
+                .hide().show(500);
+                best = true;
+
+                ranks.last()
+                .addClass('out')
+                .hide(500, () => ranks.last().remove());
+
+
+                return false;
+            }
+        });
+        if (!best) {
+            dom.addClass('out');
+        }
+        return dom;
     }
 
     function nextChar() {
@@ -244,7 +265,12 @@ $(() => {
                     $.ajax({
                         'type': 'POST',
                         'dataType': 'text',
-                        'data': {'name': name.text(), 'time': timer.text(), 'error': error.text()},
+                        'data': {
+                            'id': socket.id,
+                            'name': name.text(),
+                            'time': end_time - start_time,
+                            'error': error.text()
+                        },
                         'error': (err) => {
                             const message = $('<p>', {'text': 'BadRequest!!'});
                             message.insertAfter($('#info p').last())
@@ -337,6 +363,14 @@ $(() => {
                 q.addClass('now');
             }
         }, 50);
+    });
+
+    const socket = io.connect();
+    socket.on('record:new', data => {
+        if (data.id !== socket.id) {
+            data.time = +data.time;
+            newRecord(data, false);
+        }
     });
 });
 
