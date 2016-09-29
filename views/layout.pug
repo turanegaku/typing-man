@@ -6,6 +6,8 @@ html
   body
     header
       h1: a(href='/')= title
+      if name
+        .username(style='display: none')= name
 
     .container
       #info

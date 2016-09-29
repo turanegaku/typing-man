@@ -6,6 +6,7 @@ $(() => {
     const TYPING = 1 << 0;
     const FINISH = 1 << 1;
 
+
     // =============== useful function =============== //
     function getRandomArbitary(min, max) {
         return Math.random() * (max - min) + min;
@@ -36,6 +37,7 @@ $(() => {
             || e.which === 47;  // slash
     }
 
+
     // =============== ready for start =============== //
     // wrap all char in question with span
     $('#question :not(:has(p))').contents()
@@ -52,14 +54,9 @@ $(() => {
     $('#question span:last-child')
     .after('<span class="enter"> </span>');
 
-    // get cookie name
-    const cookies = {};
-    document.cookie.split('; ').forEach(c => {
-        const str = c.split('=');
-        cookies[str[0]] = str[1];
-    });
-    // =============== ready for start =============== //
 
+    let username = $('header .username').text();
+    // =============== main function =============== //
     const questions = $('#question span:not(:has(*))'); // all of char
 
     const miss  = $('#miss');                           // collection for misstype chars
@@ -142,27 +139,27 @@ $(() => {
                 'class': 'inline-2 time'
             })
         );
+
+        if (username) {
+            for (let i = 0; i < username.length; ++i) {
+                my.find('.name .enter').before(
+                    $('<span>', {'text': username[i]})
+                );
+            }
+        }
+
         let best = false;
         const ranks = rank.find('ol > li');
         ranks.each((i, r) => {
             const result = $(r);
             const record = moment(result.children('.time').text(), 'mm:ss.SS');
             const error = $(r).children('.error');
-            console.log(my_record < record, my_record - record === 0, +my_error <= +error.text());
             if (my_record < record || my_record - record === 0 && +my_error <= +error.text()) {
                 my.insertBefore(result)
                 .hide().show(500);
                 best = true;
 
                 ranks.last().hide(500, () => ranks.last().remove());
-
-                if (cookies.name) {
-                    for (let i = 0; i < cookies.name.length; ++i) {
-                        rank.find('ol > li.my .name .enter').before(
-                            $('<span>', {'text': cookies.name[i]})
-                        );
-                    }
-                }
 
                 $('#option button#restart').attr('disabled', 'disabled');
 
@@ -238,7 +235,7 @@ $(() => {
                     return false;
                 } else if (isnl(e)) {
                     step &= ~TYPING;
-                    name.children('.enter, .yet').remove();    // delete miss
+                    name.children('.enter, .yet').remove();
                     $.ajax({
                         'type': 'POST',
                         'dataType': 'text',
