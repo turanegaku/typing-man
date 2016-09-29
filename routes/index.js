@@ -63,11 +63,16 @@ router.get('/:man', (req, res, next) => {
             });
         }
 
-        res.render('mans/' + trg, {
+        const arg = {
             'title': 'typing-man',
             'ranks': ranks,
-            'name': req.cookies.name
-        });
+        };
+        if (req.cookies.name) {
+            arg.name = req.cookies.name;
+        }
+
+        console.log(req.cookies.name);
+        res.render('mans/' + trg, arg);
     });
     db.close();
 });

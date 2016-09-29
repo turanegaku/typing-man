@@ -24,7 +24,7 @@ block content
     ol(style='font-size: 2vw;')
       for rank in ranks
         li
-          .inline-2.name= rank.name
+          .inline-2.name!= rank.name
           .inline-2.time= rank.time
           .inline-1.error= rank.error
 
