@@ -3,7 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
 const sqlite3 = require('sqlite3').verbose();
+const socket = require('../module/socket.js');
 const router = new express.Router();
+
+const rankMAX = 10;
 
 const mans = new Array();
 let db;
@@ -32,7 +35,8 @@ router.get('/:man', (req, res, next) => {
         next();
         return;
     }
-    const ranks = new Array();
+
+    const ranks = new Array(rankMAX);
     db = new sqlite3.Database('./database.sqlite3');
     db.all('SELECT * FROM record WHERE man == ? ORDER BY time, error, date DESC LIMIT 10', trg, (err, rows) => {
         if (err) {
@@ -40,27 +44,22 @@ router.get('/:man', (req, res, next) => {
             res.end('error');
             return;
         }
-        for (let i = 0; i < 10; ++i) {
-            ranks.push({
-                'name': 'NoData',
-                'time': moment(30 * 60 * 1000).format('mm:ss.SS'),
-                'error': 0,
-            });
-        }
+
         rows.forEach((row, i) => {
             ranks[i] = {
                 'name': row.name,
-                'time': moment(row.time).format('mm:ss.SS'),
+                'time': row.time,
+                'timer': moment(row.time).format('mm:ss.SS'),
                 'error': row.error,
             };
         });
-
-        while (ranks.length < 10) {
-            ranks.push({
+        for (let i = rows.length; i < ranks.length; ++i) {
+            ranks[i] = {
                 'name': 'NoData',
-                'time': moment(30 * 60 * 1000).format('mm:ss.SS'),
+                'time': 30 * 60 * 1000,
+                'timer': moment(30 * 60 * 1000).format('mm:ss.SS'),
                 'error': 0,
-            });
+            };
         }
 
         const arg = {
@@ -71,7 +70,6 @@ router.get('/:man', (req, res, next) => {
             arg.name = req.cookies.name;
         }
 
-        console.log(req.cookies.name);
         res.render('mans/' + trg, arg);
     });
     db.close();
@@ -80,22 +78,20 @@ router.get('/:man', (req, res, next) => {
 router.post('/:man', (req, res, next) => {
     const trg = req.params.man;
     if (mans.indexOf(trg) < 0) {
-        // next();
+        next();
         return;
     }
 
-    const name = req.body.name;
-    const time = moment(req.body.time, 'mm:ss.SS') - moment('0', 'm');
-    const error = req.body.error;
     console.log(req.body);
     let valid = true;
-    if (!name || !time || !error || name.length > 12 || time < 0 || error < 0) {
+    if (!req.body.name || !req.body.time || !req.body.error
+        || req.body.name.length > 12 || req.body.time < 0 || req.body.error < 0) {
         valid = false;
     }
 
     if (valid) {
         db = new sqlite3.Database('./database.sqlite3');
-        db.run('INSERT INTO record VALUES(?, ?, ?, ?, ?)', moment().unix(), trg, name, time, error, (err) => {
+        db.run('INSERT INTO record VALUES(?, ?, ?, ?, ?)', moment().unix(), trg, req.body.name, req.body.time, req.body.error, (err) => {
             if (err) {
                 console.error(err);
                 valid = false;
@@ -105,12 +101,12 @@ router.post('/:man', (req, res, next) => {
     }
 
     if (valid) {
-        res.cookie('name', name);
+        res.cookie('name', req.body.name);
         res.end('ok');
+        socket.post(trg, req.body);
     } else {
         res.status(400);
         res.end('invalid');
-        return;
     }
 });
 

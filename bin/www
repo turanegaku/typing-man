@@ -6,6 +6,7 @@
  */
 
 const app = require('../app');
+const socket = require('../module/socket');
 const debug = require('debug')('typing-man:server');
 const http = require('http');
 
@@ -21,6 +22,8 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
+socket.io(server);
+
 
 /**
  * Listen on provided port, on all network interfaces.
