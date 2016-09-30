@@ -33,7 +33,27 @@ fs.readdir('./views/mans', (err, files) => {
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-    res.render('index', {'title': 'typing-man', 'mans': mans});
+    const q = 'SELECT man, name, time FROM record AS a WHERE NOT EXISTS(SELECT 1 FROM record as b WHERE a.man = b.man AND(a.time > b.time OR a.time = b.time AND a.error > b.error))';
+    pool.query(q, (err, ret) => {
+        if (err) {
+            console.error(err);
+            res.end('error');
+            return;
+        }
+        const holder = {};
+        ret.rows.forEach(row => {
+            holder[row.man] = {
+                'name': row.name,
+                'time': moment(row.time).format('mm:ss'),
+            };
+        });
+        console.log(holder);
+        res.render('index', {
+            'title': 'typing-man',
+            'mans': mans,
+            'holder': holder,
+        });
+    });
 });
 
 router.get('/:man', (req, res, next) => {

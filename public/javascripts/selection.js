@@ -83,6 +83,12 @@ $(() => {
         });
     });
 
+    let holder_id = setTimeout(() => $('.holder').addClass('visible'), 5000);
+    $('html').keydown((e) => {
+        $('.holder.visible').removeClass('visible');
+        clearInterval(holder_id);
+        holder_id = setTimeout(() => $('.holder').addClass('visible'), 5000);
+    });
     $('html').keypress((e) => {
         const link = $('#selection a.movable');
         if (isnl(e) && link.length) {
