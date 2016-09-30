@@ -47,7 +47,6 @@ router.get('/', (req, res, next) => {
                 'time': moment(row.time).format('mm:ss'),
             };
         });
-        console.log(holder);
         res.render('index', {
             'title': 'typing-man',
             'mans': mans,
