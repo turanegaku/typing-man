@@ -6,18 +6,18 @@ include ../man
     dt DESCRIPTION
     dd
       | The grep utility searches any given input files, selecting lines that 
-      | match one or more patterns.  By default, a pattern matches an input line 
+      | match one or more patterns. By default, a pattern matches an input line 
       | if the regular expression (RE) in the pattern matches the input line 
-      | without its trailing newline.  An empty expression matches every line. 
+      | without its trailing newline. An empty expression matches every line. 
       | Each input line that matches at least one of the patterns is written to 
       | the standard output.
 
     dd
       | grep is used for simple patterns and basic regular expressions (BREs); 
-      | egrep can handle extended regular expressions (EREs).  See re_format(7) 
-      | for more information on regular expressions.  fgrep is quicker than both 
+      | egrep can handle extended regular expressions (EREs). See re_format(7) 
+      | for more information on regular expressions. fgrep is quicker than both 
       | grep and egrep, but can only handle fixed patterns (i.e. it does not 
-      | interpret regular expressions).  Patterns may consist of one or more 
+      | interpret regular expressions). Patterns may consist of one or more 
       | lines, allowing any of the pattern lines to match a portion of the input.
 
     dd
