@@ -39,7 +39,7 @@ res.split("\n").each do |line|
     if line.end_with? ':' and ['The', 'follow', 'option'].all?{ |word| line.include? word }
       break
     elsif flag
-      lines.push(line.lstrip)
+      lines.push(line.lstrip.gsub("\t", ' '))
     end
   end
 end
