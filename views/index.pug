@@ -7,6 +7,10 @@ block content
   #selection
     for man in mans
       p.inline-3
+        if holder[man]
+          span.holder
+            span.nt= holder[man].name
+            span.nt= holder[man].time
         a= man
 
 block script

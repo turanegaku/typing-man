@@ -33,6 +33,31 @@ header h1 a {
   text-decoration: underline;
 }
 
+.holder {
+  transition: all .5s;
+  position: absolute;
+  font-size: 1.8vw;
+  z-index: -1;
+  opacity: 0;
+
+  span {
+    text-align: center;
+    position: relative;
+    display: block;
+  }
+
+  &.visible {
+    transition: all .5s, padding 1s;
+    color: snow;
+    padding: 10px;
+    background-color: dimgrey;
+    margin-top: -1em;
+    margin-left: 5em;
+    opacity: 1;
+
+  }
+}
+
 .ring {
   background: rgba(royalblue, .4);
   border: solid;
