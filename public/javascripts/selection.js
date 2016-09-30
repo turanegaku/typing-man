@@ -29,7 +29,7 @@ $(() => {
 
     // =============== ready for start =============== //
     // wrap all char in selection with span
-    $('#selection :not(:has(p))').contents()
+    $('#selection :not(:has(p)):not(.nt)').contents()
     .filter((_, t) => {
         return t.nodeType === 3;
     }).each((i, txt) => {
@@ -38,6 +38,7 @@ $(() => {
     });
 
 
+    // =============== main function =============== //
     const sel_f = $('#selection a > span:first-child');
     const sel_l = $('#selection a > span:last-child');
 
