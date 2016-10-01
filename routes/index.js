@@ -103,15 +103,7 @@ router.get('/:man', (req, res, next) => {
             };
         }
 
-        const arg = {
-            'title': 'typing-man',
-            'ranks': ranks,
-        };
-        if (req.cookies.name) {
-            arg.name = req.cookies.name;
-        }
-
-        res.render('mans/' + trg, arg);
+        res.render('mans/' + trg, {'ranks': ranks});
     });
 });
 
@@ -140,7 +132,6 @@ router.post('/:man', (req, res, next) => {
     }
 
     if (valid) {
-        res.cookie('name', req.body.name);
         res.end('ok');
         socket.post(trg, req.body);
     } else {

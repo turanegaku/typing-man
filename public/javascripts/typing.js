@@ -54,8 +54,7 @@ $(() => {
     $('#question span:last-child')
     .after('<span class="enter"> </span>');
 
-
-    let username = $('header .username').text();
+    let username = $.cookie('name');
 
 
     // =============== main function =============== //
@@ -283,6 +282,7 @@ $(() => {
                     });
 
                     username = name.text();
+                    $.cookie('name', username);
                     $('#option button').removeAttr('disabled');
                     const out = rank.find('ol > li.my.out');
                     out.hide(200, () => out.remove());
