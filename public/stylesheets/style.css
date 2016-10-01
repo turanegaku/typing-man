@@ -16,6 +16,39 @@ header h1 a {
   text-decoration: none;
 }
 
+header form#layout label {
+  font-size: 1.8vw;
+}
+
+header form#layout input[type=radio] {
+  display: none;
+}
+
+header form#layout input[type=radio] + label {
+  position: relative;
+  cursor: pointer;
+  padding: 6px 12px;
+  margin: 5px;
+  border-color: #ccc;
+  border-radius: 4px;
+}
+
+header form#layout input[type=radio]:checked + label {
+  transition: top .5s, background-color .5s, color .5s, box-shadow .5s;
+  top: -2px;
+  font-weight: bold;
+  background-color: deepskyblue;
+  color: azure;
+  box-shadow: 0px 1px 1px 1px grey;
+}
+
+header form#layout input[type=radio]:not(:checked) + label {
+  transition: top .2s, background-color .2s, color .2s, box-shadow .2s;
+  top: 0px;
+  background-color: whitesmoke;
+  color: grey;
+}
+
 .enter {
   background-color: mistyrose;
 }

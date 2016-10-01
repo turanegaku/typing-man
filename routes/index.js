@@ -25,6 +25,7 @@ const pool = new Pool({
 });
 
 const rankMAX = 10;
+const layouts = ['QWERTY', 'Dvorak', 'Colemak'];
 
 const mans = new Array();
 
@@ -33,6 +34,17 @@ fs.readdir('./views/mans', (err, files) => {
         mans.push(path.basename(file, '.pug'));
     });
 });
+
+router.use((req, res, next) => {
+    res.locals.layouts = layouts;
+    if (req.cookies.layout) {
+        res.locals.layout = req.cookies.layout;
+    } else {
+        res.locals.layout = layouts[0];
+    }
+    next();
+});
+
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
@@ -51,7 +63,6 @@ router.get('/', (req, res, next) => {
             };
         });
         res.render('index', {
-            'title': 'typing-man',
             'mans': mans,
             'holder': holder,
         });

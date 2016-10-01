@@ -10,6 +10,7 @@ const paths = {
 gulp.task('lib', () => {
     gulp.src([
         'node_modules/jquery/dist/jquery.min.js',
+        'node_modules/jquery.cookie/jquery.cookie.js',
         'node_modules/jquery.easing/jquery.easing.min.js',
         'node_modules/moment/min/moment.min.js'
     ])
