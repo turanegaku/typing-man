@@ -7,16 +7,19 @@ const router = new express.Router();
 
 const url = require('url');
 
+const config = require('config');
+
 const Pool = require('pg').Pool;
-const params = url.parse(process.env.DATABASE_URL || require('config').get('DATABASE_URL'));
+const params = url.parse(process.env.DATABASE_URL || config.get('DATABASE_URL'));
 const auth = params.auth.split(':');
+const ssl = config.has('ssl') ? config.get('ssl') : true;
 const pool = new Pool({
     'user': auth[0],
     'password': auth[1],
     'host': params.hostname,
     'port': params.port,
     'database': params.pathname.split('/')[1],
-    'ssl': true,
+    'ssl': ssl,
     'max': 20,
     'idleTimeoutMillis': 1000,
 });
