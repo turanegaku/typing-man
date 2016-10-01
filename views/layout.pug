@@ -6,8 +6,20 @@ html
   body
     header
       h1: a(href='/')= title
-      if name
-        .username(style='display: none')= name
+      form#layout
+        each l in layouts
+          if l === layout
+            input(id= l, type='radio', name='layout', checked)
+          else
+            input(id= l, type='radio', name='layout')
+          label(for= l)= l
+        script.
+          window.onload = () => {
+            $('header form#layout > input[type=radio]')
+            .change((e) => {
+              $.cookie('layout', $(e.target).attr('id'));
+            });
+          }
 
     .container
       #info
@@ -17,5 +29,6 @@ html
 
     script(type='text/javascript', src='/static/js/jquery.min.js')
     script(type='text/javascript', src='/static/js/jquery.easing.min.js')
+    script(type='text/javascript', src='/static/js/jquery.cookie.js')
     script(type='text/javascript', src='/static/js/moment.min.js')
     block script
