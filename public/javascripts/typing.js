@@ -95,6 +95,7 @@ $(() => {
         question.addClass('now');
 
         miss.children().remove();
+        error.text('0');
 
         $('#option button#review').attr('disabled', 'disabled');
         $('#option button#restart').removeAttr('disabled');
