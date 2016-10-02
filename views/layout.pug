@@ -9,9 +9,9 @@ html
       form#layout
         each l in layouts
           if l === layout
-            input(id= l, type='radio', name='layout', checked)
+            input(id= l, type='radio', name='layout', value= l, checked)
           else
-            input(id= l, type='radio', name='layout')
+            input(id= l, type='radio', name='layout', value= l)
           label(for= l)= l
         script.
           window.onload = () => {
