@@ -8,30 +8,29 @@ html
       h1: a(href='/')= title
       form#layout
         section
-          each l in keyboards
-            if l === keyboard
-              input(id= l, type='radio', name='keyboard', value= l, checked)
-            else
-              input(id= l, type='radio', name='keyboard', value= l)
-            label(for= l)= l
+          p you using
+          .chainer
+            each l in keyboards
+              input(id= l, type='radio', name='keyboard', value= l, checked=(l === keyboard), disabled=(layout === 'QWERTY' || true))
+              label(for= l)= l
         section
-          each l in layouts
-            if l === layout
-              input(id= l, type='radio', name='layout', value= l, checked)
-            else
-              input(id= l, type='radio', name='layout', value= l)
-            label(for= l)= l
+          p practice others!!
+          .chainer
+            each l in layouts
+              input(id= l, type='radio', name='layout', value= l, checked=(l === layout))
+              label(for= l)= l
         script.
           window.onload = () => {
-            $('header form#layout > input[type=radio name=layout]')
+            $('header form#layout input[name=layout]')
             .change((e) => {
               $.cookie('layout', $(e.target).val());
+                $('header form#layout input[name=keyboard]').attr('disabled', $(e.target).val() === 'QWERTY' || true);
             });
-            $('header form#layout > input[type=radio name=keyboard]')
+            $('header form#layout input[name=keyboard]')
             .change((e) => {
               $.cookie('keyboard', $(e.target).val());
             });
-          }
+          };
 
     .container
       #info
