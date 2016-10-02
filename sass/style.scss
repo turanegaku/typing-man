@@ -132,9 +132,12 @@ header {
     float: right;
 
     section {
+      display: inline-block;
+    }
+
+    .chainer {
       margin: 0 5px;
       padding: 0 5px;
-      display: inline-block;
       background-color: mistyrose;
     }
 
@@ -152,10 +155,12 @@ header {
         margin: 5px;
         border: 1px solid transparent;
         border-radius: 2px;
+
       }
 
       &:checked + label {
         transition: top .5s, background-color .5s, color .5s, box-shadow .5s;
+        transition: opacity .3s;
         top: -2px;
         font-weight: bold;
         background-color: deepskyblue;
@@ -165,12 +170,18 @@ header {
       }
       &:not(:checked) + label {
         transition: top .2s, background-color .2s, color .2s, box-shadow .2s;
+        transition: opacity .3s;
         top: 0px;
         background-color: whitesmoke;
         border-color: lightblue;
         color: grey;
       }
 
+      &:disabled + label {
+        transition: opacity .2s;
+        opacity: .2;
+        cursor: default;
+      }
     }
   }
 }

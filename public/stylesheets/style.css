@@ -134,9 +134,12 @@ header form#layout {
 }
 
 header form#layout section {
+  display: inline-block;
+}
+
+header form#layout .chainer {
   margin: 0 5px;
   padding: 0 5px;
-  display: inline-block;
   background-color: mistyrose;
 }
 
@@ -159,6 +162,7 @@ header form#layout input[type=radio] + label {
 
 header form#layout input[type=radio]:checked + label {
   transition: top .5s, background-color .5s, color .5s, box-shadow .5s;
+  transition: opacity .3s;
   top: -2px;
   font-weight: bold;
   background-color: deepskyblue;
@@ -169,10 +173,17 @@ header form#layout input[type=radio]:checked + label {
 
 header form#layout input[type=radio]:not(:checked) + label {
   transition: top .2s, background-color .2s, color .2s, box-shadow .2s;
+  transition: opacity .3s;
   top: 0px;
   background-color: whitesmoke;
   border-color: lightblue;
   color: grey;
+}
+
+header form#layout input[type=radio]:disabled + label {
+  transition: opacity .2s;
+  opacity: .2;
+  cursor: default;
 }
 
 #question {
