@@ -1,2 +1,2 @@
-# wordcardbattle
-SNS vocabuary game for school festival
+# typing-man
+typing game for school festival
