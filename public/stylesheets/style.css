@@ -11,9 +11,126 @@ a {
   color: #00B7FF;
 }
 
+h1 {
+  font-size: 4vw;
+}
+
+dt, h3 {
+  white-space: pre;
+  font-size: 2.2vw;
+}
+
+dd, p {
+  white-space: pre;
+  font-size: 2vw;
+}
+
+button.default, #selection a[href] {
+  font-size: 2vw;
+  cursor: pointer;
+  color: #333;
+  background-color: #fff;
+  padding: 6px 12px;
+  margin: 5px;
+  border: 1px solid transparent;
+  border-color: #ccc;
+  border-radius: 4px;
+}
+
+button.default:disabled, #selection a[href]:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: .65;
+}
+
+button.default:not(:disabled):hover, #selection a[href]:not(:disabled):hover {
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+
+button.default:not(:disabled):active, #selection a[href]:not(:disabled):active {
+  background-color: #dfdfdf;
+  border-color: #8c8c8c;
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.12);
+}
+
+.tab {
+  padding-left: 2.5em;
+}
+
+.inline-1 {
+  width: 10%;
+  display: inline-block;
+}
+
+.inline-2 {
+  width: 20%;
+  display: inline-block;
+}
+
+.inline-3 {
+  width: 30%;
+  display: inline-block;
+}
+
+.inline-6 {
+  width: 60%;
+  display: inline-block;
+}
+
+.enter {
+  background-color: mistyrose;
+}
+
+.delete, #miss span.miss {
+  color: lavenderblush;
+  font-size: 2vw;
+  position: relative;
+  background-color: crimson;
+}
+
+.done {
+  color: springgreen;
+}
+
+.now {
+  text-decoration: underline;
+}
+
+.ring {
+  background: rgba(65, 105, 225, 0.4);
+  border: solid;
+  border-color: royalblue;
+  border-width: 1px;
+  position: absolute;
+  border-radius: 100px;
+  height: 10px;
+  width: 10px;
+  margin-top: -15px;
+  margin-left: -2px;
+  transform: scale(0);
+  animation: pulsate 1s ease-out;
+  animation-iteration-count: 3;
+}
+
+@keyframes pulsate {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+header h1 {
+  display: inline-block;
+}
+
 header h1 a {
   color: midnightblue;
   text-decoration: none;
+}
+
+header form#layout {
+  float: right;
 }
 
 header form#layout label {
@@ -47,72 +164,6 @@ header form#layout input[type=radio]:not(:checked) + label {
   top: 0px;
   background-color: whitesmoke;
   color: grey;
-}
-
-.enter {
-  background-color: mistyrose;
-}
-
-.delete, #miss span.miss {
-  color: lavenderblush;
-  font-size: 2vw;
-  position: relative;
-  background-color: crimson;
-}
-
-.done {
-  color: springgreen;
-}
-
-.now {
-  text-decoration: underline;
-}
-
-.holder {
-  transition: all .5s;
-  position: absolute;
-  font-size: 1.8vw;
-  z-index: -1;
-  opacity: 0;
-}
-
-.holder span {
-  text-align: center;
-  position: relative;
-  display: block;
-}
-
-.holder.visible {
-  transition: all .5s, padding 1s;
-  color: snow;
-  padding: 10px;
-  background-color: dimgrey;
-  margin-top: -1em;
-  margin-left: 5em;
-  opacity: 1;
-}
-
-.ring {
-  background: rgba(65, 105, 225, 0.4);
-  border: solid;
-  border-color: royalblue;
-  border-width: 1px;
-  position: absolute;
-  border-radius: 100px;
-  height: 10px;
-  width: 10px;
-  margin-top: -15px;
-  margin-left: -2px;
-  transform: scale(0);
-  animation: pulsate 1s ease-out;
-  animation-iteration-count: 3;
-}
-
-@keyframes pulsate {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
 }
 
 #question {
@@ -152,6 +203,30 @@ header form#layout input[type=radio]:not(:checked) + label {
 
 #selection a:not(.movable) span.done + span:not(.done) {
   text-decoration: underline;
+}
+
+#selection .holder {
+  transition: all .5s;
+  position: absolute;
+  font-size: 1.8vw;
+  z-index: -1;
+  opacity: 0;
+}
+
+#selection .holder span {
+  text-align: center;
+  position: relative;
+  display: block;
+}
+
+#selection .holder.visible {
+  transition: all .5s, padding 1s;
+  color: snow;
+  padding: 10px;
+  background-color: dimgrey;
+  margin-top: -1em;
+  margin-left: 5em;
+  opacity: 1;
 }
 
 #drop span {
@@ -203,71 +278,4 @@ header form#layout input[type=radio]:not(:checked) + label {
 
 #rank ol li.my .name span:nth-child(13) {
   visibility: hidden;
-}
-
-button.default, #selection a[href] {
-  font-size: 2vw;
-  cursor: pointer;
-  color: #333;
-  background-color: #fff;
-  padding: 6px 12px;
-  margin: 5px;
-  border: 1px solid transparent;
-  border-color: #ccc;
-  border-radius: 4px;
-}
-
-button.default:disabled, #selection a[href]:disabled {
-  cursor: not-allowed;
-  box-shadow: none;
-  opacity: .65;
-}
-
-button.default:not(:disabled):hover, #selection a[href]:not(:disabled):hover {
-  background-color: #e6e6e6;
-  border-color: #adadad;
-}
-
-button.default:not(:disabled):active, #selection a[href]:not(:disabled):active {
-  background-color: #dfdfdf;
-  border-color: #8c8c8c;
-  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.12);
-}
-
-.tab {
-  padding-left: 2.5em;
-}
-
-h1 {
-  font-size: 4vw;
-}
-
-dt, h3 {
-  white-space: pre;
-  font-size: 2.2vw;
-}
-
-dd, p {
-  white-space: pre;
-  font-size: 2vw;
-}
-
-.inline-1 {
-  width: 10%;
-  display: inline-block;
-}
-
-.inline-2 {
-  width: 20%;
-  display: inline-block;
-}
-
-.inline-3 {
-  width: 30%;
-  display: inline-block;
-}
-
-.inline-6 {
-  width: 60%;
-  display: inline-block;
 }
