@@ -129,8 +129,14 @@ header {
   }
 
   form#layout {
-    // display: inline-block;
     float: right;
+
+    section {
+      margin: 0 5px;
+      padding: 0 5px;
+      display: inline-block;
+      background-color: mistyrose;
+    }
 
     label {
       font-size: 1.8vw;
@@ -144,8 +150,8 @@ header {
         cursor: pointer;
         padding: 6px 12px;
         margin: 5px;
-        border-color: #ccc;
-        border-radius: 4px;
+        border: 1px solid transparent;
+        border-radius: 2px;
       }
 
       &:checked + label {
@@ -154,12 +160,14 @@ header {
         font-weight: bold;
         background-color: deepskyblue;
         color: azure;
+        border-color: aliceblue;
         box-shadow: 0px 1px 1px 1px grey;
       }
       &:not(:checked) + label {
         transition: top .2s, background-color .2s, color .2s, box-shadow .2s;
         top: 0px;
         background-color: whitesmoke;
+        border-color: lightblue;
         color: grey;
       }
 

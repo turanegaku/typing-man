@@ -25,6 +25,7 @@ const pool = new Pool({
 });
 
 const rankMAX = 10;
+const keyboards = ['JIS', 'US'];
 const layouts = ['QWERTY', 'Dvorak', 'Colemak'];
 
 const mans = new Array();
@@ -36,12 +37,20 @@ fs.readdir('./views/mans', (err, files) => {
 });
 
 router.use((req, res, next) => {
+    res.locals.keyboards = keyboards;
+    if (req.cookies.keyboard) {
+        res.locals.keyboard = req.cookies.keyboard;
+    } else {
+        res.locals.keyboard = keyboards[0];
+    }
+
     res.locals.layouts = layouts;
     if (req.cookies.layout) {
         res.locals.layout = req.cookies.layout;
     } else {
         res.locals.layout = layouts[0];
     }
+
     next();
 });
 

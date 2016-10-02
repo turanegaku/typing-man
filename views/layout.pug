@@ -7,17 +7,29 @@ html
     header
       h1: a(href='/')= title
       form#layout
-        each l in layouts
-          if l === layout
-            input(id= l, type='radio', name='layout', value= l, checked)
-          else
-            input(id= l, type='radio', name='layout', value= l)
-          label(for= l)= l
+        section
+          each l in keyboards
+            if l === keyboard
+              input(id= l, type='radio', name='keyboard', value= l, checked)
+            else
+              input(id= l, type='radio', name='keyboard', value= l)
+            label(for= l)= l
+        section
+          each l in layouts
+            if l === layout
+              input(id= l, type='radio', name='layout', value= l, checked)
+            else
+              input(id= l, type='radio', name='layout', value= l)
+            label(for= l)= l
         script.
           window.onload = () => {
-            $('header form#layout > input[type=radio]')
+            $('header form#layout > input[type=radio name=layout]')
             .change((e) => {
-              $.cookie('layout', $(e.target).attr('id'));
+              $.cookie('layout', $(e.target).val());
+            });
+            $('header form#layout > input[type=radio name=keyboard]')
+            .change((e) => {
+              $.cookie('keyboard', $(e.target).val());
             });
           }
 
