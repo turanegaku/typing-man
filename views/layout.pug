@@ -11,7 +11,7 @@ html
           p you using
           .chainer
             each l in keyboards
-              input(id= l, type='radio', name='keyboard', value= l, checked=(l === keyboard), disabled=(layout === 'QWERTY' || true))
+              input(id= l, type='radio', name='keyboard', value= l, checked=(l === keyboard), disabled=(layout === 'QWERTY'))
               label(for= l)= l
         section
           p practice others!!
@@ -24,7 +24,7 @@ html
             $('header form#layout input[name=layout]')
             .change((e) => {
               $.cookie('layout', $(e.target).val());
-                $('header form#layout input[name=keyboard]').attr('disabled', $(e.target).val() === 'QWERTY' || true);
+                $('header form#layout input[name=keyboard]').attr('disabled', $(e.target).val() === 'QWERTY');
             });
             $('header form#layout input[name=keyboard]')
             .change((e) => {
