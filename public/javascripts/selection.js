@@ -203,8 +203,11 @@ $(() => {
     });
     $(document).keydown(e => {
         const link = $('#selection a.movable');
-        if (isnl(e) && link.length) {
-            location.href = link.text();
+        if (isnl(e)) {
+            if (link.length) {
+                location.href = link.text();
+            }
+            return false;
         }
     });
 });
