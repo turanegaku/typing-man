@@ -374,8 +374,7 @@ $(() => {
                         'type': 'POST',
                         'dataType': 'text',
                         'data': {
-                            // 'id': socket.id,
-                            'id': 0,
+                            'id': socket.id,
                             'name': name.text(),
                             'time': end_time - start_time,
                             'error': error.text()
@@ -475,7 +474,6 @@ $(() => {
         }, 50);
     });
 
-    /*
     const socket = io.connect();
     socket.on('record:new', data => {
         if (data.id !== socket.id) {
@@ -483,6 +481,5 @@ $(() => {
             newRecord(data, false);
         }
     });
-    */
 });
 
