@@ -1,0 +1,270 @@
+body {
+  padding: 10px;
+  font: 14px Inconsolata, "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.container {
+  padding: 10px 30px;
+}
+
+a {
+  color: #00B7FF;
+}
+
+h1 {
+  font-size: 4vw;
+}
+
+dt, h3 {
+  white-space: pre;
+  font-size: 2.2vw;
+}
+
+dd, p {
+  white-space: pre;
+  font-size: 2vw;
+}
+
+button.default, #selection a[href] {
+  font-size: 2vw;
+  cursor: pointer;
+  color: #333;
+  background-color: #fff;
+  padding: 6px 12px;
+  margin: 5px;
+  border: 1px solid transparent;
+  border-color: #ccc;
+  border-radius: 4px;
+}
+button.default:disabled, #selection a[href]:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.65;
+}
+button.default:not(:disabled):hover, #selection a[href]:not(:disabled):hover {
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+button.default:not(:disabled):active, #selection a[href]:not(:disabled):active {
+  background-color: #dfdfdf;
+  border-color: #8c8c8c;
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.12);
+}
+
+.tab {
+  padding-left: 2.5em;
+}
+
+.inline-1 {
+  width: 10%;
+  display: inline-block;
+}
+
+.inline-2 {
+  width: 20%;
+  display: inline-block;
+}
+
+.inline-3 {
+  width: 30%;
+  display: inline-block;
+}
+
+.inline-6 {
+  width: 60%;
+  display: inline-block;
+}
+
+.enter {
+  background-color: mistyrose;
+}
+
+.delete, #miss span.miss {
+  color: lavenderblush;
+  font-size: 2vw;
+  position: relative;
+  background-color: crimson;
+}
+
+.done {
+  color: springgreen;
+}
+
+.now {
+  text-decoration: underline;
+}
+
+.ring {
+  background: rgba(65, 105, 225, 0.4);
+  border: solid;
+  border-color: royalblue;
+  border-width: 1px;
+  position: absolute;
+  border-radius: 100px;
+  height: 10px;
+  width: 10px;
+  margin-top: -15px;
+  margin-left: -2px;
+  transform: scale(0);
+  animation: pulsate 1s ease-out;
+  animation-iteration-count: 3;
+}
+
+@keyframes pulsate {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+header h1 {
+  display: inline-block;
+}
+header h1 a {
+  color: midnightblue;
+  text-decoration: none;
+}
+header form#layout {
+  float: right;
+}
+header form#layout section {
+  display: inline-block;
+}
+header form#layout .chainer {
+  margin: 0 5px;
+  padding: 0 5px;
+  background-color: mistyrose;
+}
+header form#layout label {
+  font-size: 1.8vw;
+}
+header form#layout input[type=radio] {
+  display: none;
+}
+header form#layout input[type=radio] + label {
+  position: relative;
+  cursor: pointer;
+  padding: 6px 12px;
+  margin: 5px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+header form#layout input[type=radio]:checked + label {
+  transition: top 0.5s, background-color 0.5s, color 0.5s, box-shadow 0.5s;
+  transition: opacity 0.3s;
+  top: -2px;
+  font-weight: bold;
+  background-color: deepskyblue;
+  color: azure;
+  border-color: aliceblue;
+  box-shadow: 0px 1px 1px 1px grey;
+}
+header form#layout input[type=radio]:not(:checked) + label {
+  transition: top 0.2s, background-color 0.2s, color 0.2s, box-shadow 0.2s;
+  transition: opacity 0.3s;
+  top: 0px;
+  background-color: whitesmoke;
+  border-color: lightblue;
+  color: grey;
+}
+header form#layout input[type=radio]:disabled + label {
+  transition: opacity 0.2s;
+  opacity: 0.2;
+  cursor: default;
+}
+
+#question {
+  background-color: rgba(240, 248, 255, 0.3);
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 5px;
+}
+#question span.miss {
+  color: crimson;
+  background-color: lavenderblush;
+}
+
+#selection a:not([href]) {
+  transition: padding 0.5s, margin 0.5s, border 0.5s;
+}
+#selection a[href] {
+  transition: padding 0.5s, margin 0.5s, border 0.5s;
+  text-decoration-line: none;
+}
+#selection a.movable span {
+  transition: font-size 0.3s;
+  color: blue;
+  font-size: 2.5vw;
+}
+#selection a:not(.movable) span {
+  transition: font-size 0.3s;
+}
+#selection a:not(.movable) span:not(.done) {
+  color: grey;
+}
+#selection a:not(.movable) span.done + span:not(.done) {
+  text-decoration: underline;
+}
+#selection .holder {
+  transition: all 0.5s;
+  position: absolute;
+  font-size: 1.8vw;
+  z-index: -1;
+  opacity: 0;
+}
+#selection .holder span {
+  text-align: center;
+  position: relative;
+  display: block;
+}
+#selection .holder.visible {
+  transition: all 0.5s, padding 1s;
+  color: snow;
+  padding: 10px;
+  background-color: dimgrey;
+  margin-top: -1em;
+  margin-left: 5em;
+  opacity: 1;
+}
+
+#drop span {
+  position: absolute;
+}
+#drop span.done {
+  font-size: 2.5vw;
+}
+#drop span.miss {
+  color: red;
+}
+
+#miss {
+  position: absolute;
+  white-space: pre;
+}
+#rank ol li {
+  white-space: pre;
+}
+#rank ol li .yet {
+  opacity: 0.5;
+}
+#rank ol li :not(.enter) ~ .yet {
+  visibility: hidden;
+}
+#rank ol li:not(.my) {
+  transition: all 0.2s;
+}
+#rank ol li.my {
+  background-color: mistyrose;
+  font-size: 2.5vw;
+}
+#rank ol li.my.out {
+  margin-top: 20px;
+  list-style-type: none;
+}
+#rank ol li.my .name span:nth-child(12) {
+  text-decoration: underline;
+}
+#rank ol li.my .name span:nth-child(13) {
+  visibility: hidden;
+}
+
+/*# sourceMappingURL=style.css.map */

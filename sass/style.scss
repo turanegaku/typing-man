@@ -207,7 +207,7 @@ header {
   a[href] {
     transition: padding .5s, margin .5s, border .5s;
     text-decoration-line: none;
-    @extend button.default;
+    @extend button, .default;
   }
 
   a.movable span {

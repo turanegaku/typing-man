@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><head><title>typing-man</title><link rel="stylesheet" href="stylesheets/style.css"></head><body><header><h1><a href="/">typing-man</a></h1><form id="layout"><section><p>you using</p><div class="chainer"><input id="JIS" type="radio" name="keyboard" value="JIS" checked disabled><label for="JIS">JIS</label><input id="US" type="radio" name="keyboard" value="US" disabled><label for="US">US</label></div></section><section><p>practice others!!</p><div class="chainer"><input id="QWERTY" type="radio" name="layout" value="QWERTY" checked><label for="QWERTY">QWERTY</label><input id="Dvorak" type="radio" name="layout" value="Dvorak"><label for="Dvorak">Dvorak</label><input id="Colemak" type="radio" name="layout" value="Colemak"><label for="Colemak">Colemak</label></div></section><script>window.onload = () => {
+  $('header form#layout input[name=layout]')
+  .change((e) => {
+    $.cookie('layout', $(e.target).val());
+      $('header form#layout input[name=keyboard]').attr('disabled', $(e.target).val() === 'QWERTY');
+  });
+  $('header form#layout input[name=keyboard]')
+  .change((e) => {
+    $.cookie('keyboard', $(e.target).val());
+  });
+};
+</script></form></header><div class="container"><div id="info"><p>問題を選択してね</p></div><hr><div id="selection"><p class="inline-3"><a>a</a></p><p class="inline-3"><a>cat</a></p><p class="inline-3"><a>chmod</a></p><p class="inline-3"><a>cp</a></p><p class="inline-3"><a>curl</a></p><p class="inline-3"><a>dd</a></p><p class="inline-3"><a>echo</a></p><p class="inline-3"><a>file</a></p><p class="inline-3"><a>grep</a></p><p class="inline-3"><a>helloC</a></p><p class="inline-3"><a>ls</a></p><p class="inline-3"><a>mv</a></p><p class="inline-3"><a>pwd</a></p><p class="inline-3"><a>rm</a></p><p class="inline-3"><a>scp</a></p><p class="inline-3"><a>ssh</a></p><p class="inline-3"><a>wget</a></p><p class="inline-3"><a>yes</a></p></div></div><script type="text/javascript" src="static/js/jquery.min.js"></script><script type="text/javascript" src="static/js/jquery.easing.min.js"></script><script type="text/javascript" src="static/js/jquery.cookie.js"></script><script type="text/javascript" src="static/js/moment.min.js"></script><script type="text/javascript" src="javascripts/selection.js"></script></body></html>

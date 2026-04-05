@@ -1,0 +1,20 @@
+<!DOCTYPE html><html><head><title>typing-man</title><link rel="stylesheet" href="stylesheets/style.css"></head><body><header><h1><a href="/">typing-man</a></h1><form id="layout"><script>window.onload = () => {
+  $('header form#layout input[name=layout]')
+  .change((e) => {
+    $.cookie('layout', $(e.target).val());
+      $('header form#layout input[name=keyboard]').attr('disabled', $(e.target).val() === 'QWERTY');
+  });
+  $('header form#layout input[name=keyboard]')
+  .change((e) => {
+    $.cookie('keyboard', $(e.target).val());
+  });
+};
+</script></form></header><div class="container"><div id="info"><div class="inline-3" id="error"><dl><dt><h3>ERROR</h3></dt><dd class="value">0</dd></dl></div><div class="inline-3"><p><span class="enter">NewLine(Enter)</span></p><p><span class="delete">Delete(BS)</span></p></div><div class="inline-3" id="time"><dl><dt><h3>Time</h3></dt><dd class="value">00:00.00</dd></dl></div><p class="inline-6">キー入力と同時にスタートします</p></div><hr><div id="question"><dl><dt>NAME</dt><dd>curl - transfer a URL</dd><dt>DESCRIPTION</dt><dd>curl is a tool to transfer data from or to a server, using one of the 
+supported protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, 
+IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMB, SMBS, 
+SMTP, SMTPS, TELNET and TFTP). The command is designed to work without 
+user interaction.</dd><dd>curl offers a busload of useful tricks like proxy support, user authen-
+tication, FTP upload, HTTP post, SSL connections, cookies, file trans-
+fer resume, Metalink, and more. As you will see below, the number of 
+features will make your head spin!</dd><dd>curl is powered by libcurl for all transfer-related features. See 
+libcurl(3) for details.</dd></dl></div><div id="option"><button class="default" id="review">今のを再生</button><button class="default" id="restart">はじめから</button></div><div id="rank"><h3>ランキング</h3><ol style="font-size: 2vw;"><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li><li><div class="inline-2 name">NoData</div><div class="inline-2 time" t="0">00:00.00</div><div class="inline-1 error">-</div></li></ol></div><div id="drop"></div><div id="miss"></div></div><script type="text/javascript" src="static/js/jquery.min.js"></script><script type="text/javascript" src="static/js/jquery.easing.min.js"></script><script type="text/javascript" src="static/js/jquery.cookie.js"></script><script type="text/javascript" src="static/js/moment.min.js"></script><script type="text/javascript" src="socket.io/socket.io.js"></script><script type="text/javascript" src="javascripts/typing.js"></script></body></html>

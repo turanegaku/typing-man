@@ -370,26 +370,24 @@ $(() => {
                 } else if (isnl(e)) {
                     step &= ~TYPING;
                     name.children('.enter, .yet').remove();
-                    /*
-                    $.ajax({
-                        'type': 'POST',
-                        'dataType': 'text',
-                        'data': {
-                            'id': socket.id,
-                            'name': name.text(),
-                            'time': end_time - start_time,
-                            'error': error.text()
-                        },
-                        'error': (err) => {
-                            const message = $('<p>', {'text': 'BadRequest!!'});
-                            message.insertAfter($('#info p').last())
-                            .hide().show(500)
-                            .delay(1000, () =>
-                                   rank.find('ol > li.my').css({'color': 'lightgrey'}))
-                            .hide(200, () => message.remove());
-                        }
-                    });
-                    */
+                    // $.ajax({
+                    //     'type': 'POST',
+                    //     'dataType': 'text',
+                    //     'data': {
+                    //         'id': socket.id,
+                    //         'name': name.text(),
+                    //         'time': end_time - start_time,
+                    //         'error': error.text()
+                    //     },
+                    //     'error': (err) => {
+                    //         const message = $('<p>', {'text': 'BadRequest!!'});
+                    //         message.insertAfter($('#info p').last())
+                    //         .hide().show(500)
+                    //         .delay(1000, () =>
+                    //                rank.find('ol > li.my').css({'color': 'lightgrey'}))
+                    //         .hide(200, () => message.remove());
+                    //     }
+                    // });
 
                     username = name.text();
                     $.cookie('name', username);
