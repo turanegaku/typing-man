@@ -2,44 +2,44 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    meta(charset='UTF-8')
   body
     header
       h1: a(href='/')= title
-      form#layout
-        section
-          p you using
-          .chainer
-            each l in keyboards
-              input(id= l, type='radio', name='keyboard', value= l, checked=(l === keyboard), disabled=(layout === 'QWERTY'))
-              label(for= l)= l
-        section
-          p practice others!!
-          .chainer
-            each l in layouts
-              input(id= l, type='radio', name='layout', value= l, checked=(l === layout))
-              label(for= l)= l
-        script.
-          window.onload = () => {
-            $('header form#layout input[name=layout]')
-            .change((e) => {
-              $.cookie('layout', $(e.target).val());
-                $('header form#layout input[name=keyboard]').attr('disabled', $(e.target).val() === 'QWERTY');
-            });
-            $('header form#layout input[name=keyboard]')
-            .change((e) => {
-              $.cookie('keyboard', $(e.target).val());
-            });
-          };
-
+      //- form#layout
+      //-   section
+      //-     p you using
+      //-     .chainer
+      //-       each l in keyboards
+      //-         input(id= l, type='radio', name='keyboard', value= l, checked=(l === keyboard), disabled=(layout === 'QWERTY'))
+      //-         label(for= l)= l
+      //-   section
+      //-     p practice others!!
+      //-     .chainer
+      //-       each l in layouts
+      //-         input(id= l, type='radio', name='layout', value= l, checked=(l === layout))
+      //-         label(for= l)= l
+      //-   script.
+      //-     window.onload = () => {
+      //-       $('header form#layout input[name=layout]')
+      //-       .change((e) => {
+      //-         $.cookie('layout', $(e.target).val());
+      //-           $('header form#layout input[name=keyboard]').attr('disabled', $(e.target).val() === 'QWERTY');
+      //-       });
+      //-       $('header form#layout input[name=keyboard]')
+      //-       .change((e) => {
+      //-         $.cookie('keyboard', $(e.target).val());
+      //-       });
+      //-     };
     .container
       #info
         block info
       hr
       block content
 
-    script(type='text/javascript', src='static/js/jquery.min.js')
-    script(type='text/javascript', src='static/js/jquery.easing.min.js')
-    script(type='text/javascript', src='static/js/jquery.cookie.js')
-    script(type='text/javascript', src='static/js/moment.min.js')
+    script(type='text/javascript', src='/static/js/jquery.min.js')
+    script(type='text/javascript', src='/static/js/jquery.easing.min.js')
+    script(type='text/javascript', src='/static/js/jquery.cookie.js')
+    script(type='text/javascript', src='/static/js/moment.min.js')
     block script
