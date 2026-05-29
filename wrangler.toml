@@ -9,5 +9,7 @@ binding = "ASSETS"
 
 [[kv_namespaces]]
 binding = "TYPING_MAN_KV"
-id = "REPLACE_WITH_YOUR_KV_ID"
-preview_id = "REPLACE_WITH_YOUR_KV_PREVIEW_ID"
+id = "62d1c1d3c8fa4a2294cf4a2fb0446c94"
+
+[build]
+command = ""
