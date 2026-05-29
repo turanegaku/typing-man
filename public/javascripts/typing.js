@@ -1,400 +1,438 @@
-/* global $ io moment location document window */
+/* global $ moment location document window localStorage */
 
 $(() => {
-    // =============== constant =============== //
+    // ── constants ──────────────────────────────────────────────
     const CLEAN  = 0;
     const TYPING = 1 << 0;
     const FINISH = 1 << 1;
+    const SESSIONS_KEY = 'typing-man:sessions';
+    const SESSION_MAX  = 30;
 
-    const layout_q2d = {
-        /*    */ 32: 32,   /* !! */ 33: 33,   /* "_ */ 34: 95,   /* ## */ 35: 35,
-        /* $$ */ 36: 36,   /* %% */ 37: 37,   /* && */ 38: 38,   /* '- */ 39: 45,
-        /* (( */ 40: 40,   /* )) */ 41: 41,   /* ** */ 42: 42,   /* +} */ 43: 125,
-        /* ,w */ 44: 119,  /* -[ */ 45: 91,   /* .v */ 46: 118,  /* /z */ 47: 122,
-        /* 00 */ 48: 48,   /* 11 */ 49: 49,   /* 22 */ 50: 50,   /* 33 */ 51: 51,
-        /* 44 */ 52: 52,   /* 55 */ 53: 53,   /* 66 */ 54: 54,   /* 77 */ 55: 55,
-        /* 88 */ 56: 56,   /* 99 */ 57: 57,   /* :S */ 58: 83,   /* ;s */ 59: 115,
-        /* <W */ 60: 87,   /* =] */ 61: 93,   /* >V */ 62: 86,   /* ?Z */ 63: 90,
-        /* @@ */ 64: 64,   /* AA */ 65: 65,   /* BX */ 66: 88,   /* CJ */ 67: 74,
-        /* DE */ 68: 69,   /* E> */ 69: 62,   /* FU */ 70: 85,   /* GI */ 71: 73,
-        /* HD */ 72: 68,   /* IC */ 73: 67,   /* JH */ 74: 72,   /* KT */ 75: 84,
-        /* LN */ 76: 78,   /* MM */ 77: 77,   /* NB */ 78: 66,   /* OR */ 79: 82,
-        /* PL */ 80: 76,   /* Q" */ 81: 34,   /* RP */ 82: 80,   /* SO */ 83: 79,
-        /* TY */ 84: 89,   /* UG */ 85: 71,   /* VK */ 86: 75,   /* W< */ 87: 60,
-        /* XQ */ 88: 81,   /* YF */ 89: 70,   /* Z: */ 90: 58,   /* [/ */ 91: 47,
-        /* \\ */ 92: 92,   /* ]= */ 93: 61,   /* ^^ */ 94: 94,   /* _{ */ 95: 123,
-        /* `` */ 96: 96,   /* aa */ 97: 97,   /* bx */ 98: 120,  /* cj */ 99: 106,
-        /* de */ 100: 101, /* e. */ 101: 46,  /* fu */ 102: 117, /* gi */ 103: 105,
-        /* hd */ 104: 100, /* ic */ 105: 99,  /* jh */ 106: 104, /* kt */ 107: 116,
-        /* ln */ 108: 110, /* mm */ 109: 109, /* nb */ 110: 98,  /* or */ 111: 114,
-        /* pl */ 112: 108, /* q' */ 113: 39,  /* rp */ 114: 112, /* so */ 115: 111,
-        /* ty */ 116: 121, /* ug */ 117: 103, /* vk */ 118: 107, /* w, */ 119: 44,
-        /* xq */ 120: 113, /* yf */ 121: 102, /* z; */ 122: 59,  /* {? */ 123: 63,
-        /* || */ 124: 124, /* }+ */ 125: 43,  /* ~~ */ 126: 126,
-    };
-    const layout_q2c = {
-        /*    */ 32: 32,   /* !! */ 33: 33,   /* "" */ 34: 34,   /* ## */ 35: 35,
-        /* $$ */ 36: 36,   /* %% */ 37: 37,   /* && */ 38: 38,   /* '' */ 39: 39,
-        /* (( */ 40: 40,   /* )) */ 41: 41,   /* ** */ 42: 42,   /* ++ */ 43: 43,
-        /* ,, */ 44: 44,   /* -- */ 45: 45,   /* .. */ 46: 46,   /* // */ 47: 47,
-        /* 00 */ 48: 48,   /* 11 */ 49: 49,   /* 22 */ 50: 50,   /* 33 */ 51: 51,
-        /* 44 */ 52: 52,   /* 55 */ 53: 53,   /* 66 */ 54: 54,   /* 77 */ 55: 55,
-        /* 88 */ 56: 56,   /* 99 */ 57: 57,   /* :O */ 58: 79,   /* ;o */ 59: 111,
-        /* << */ 60: 60,   /* == */ 61: 61,   /* >> */ 62: 62,   /* ?? */ 63: 63,
-        /* @@ */ 64: 64,   /* AA */ 65: 65,   /* BB */ 66: 66,   /* CC */ 67: 67,
-        /* DS */ 68: 83,   /* EF */ 69: 70,   /* FT */ 70: 84,   /* GD */ 71: 68,
-        /* HH */ 72: 72,   /* IU */ 73: 85,   /* JN */ 74: 78,   /* KE */ 75: 69,
-        /* LI */ 76: 73,   /* MM */ 77: 77,   /* NK */ 78: 75,   /* OY */ 79: 89,
-        /* P: */ 80: 58,   /* QQ */ 81: 81,   /* RP */ 82: 80,   /* SR */ 83: 82,
-        /* TG */ 84: 71,   /* UL */ 85: 76,   /* VV */ 86: 86,   /* WW */ 87: 87,
-        /* XX */ 88: 88,   /* YJ */ 89: 74,   /* ZZ */ 90: 90,   /* [[ */ 91: 91,
-        /* \\ */ 92: 92,   /* ]] */ 93: 93,   /* ^^ */ 94: 94,   /* __ */ 95: 95,
-        /* `` */ 96: 96,   /* aa */ 97: 97,   /* bb */ 98: 98,   /* cc */ 99: 99,
-        /* ds */ 100: 115, /* ef */ 101: 102, /* ft */ 102: 116, /* gd */ 103: 100,
-        /* hh */ 104: 104, /* iu */ 105: 117, /* jn */ 106: 110, /* ke */ 107: 101,
-        /* li */ 108: 105, /* mm */ 109: 109, /* nk */ 110: 107, /* oy */ 111: 121,
-        /* p; */ 112: 59,  /* qq */ 113: 113, /* rp */ 114: 112, /* sr */ 115: 114,
-        /* tg */ 116: 103, /* ul */ 117: 108, /* vv */ 118: 118, /* ww */ 119: 119,
-        /* xx */ 120: 120, /* yj */ 121: 106, /* zz */ 122: 122, /* {{ */ 123: 123,
-        /* || */ 124: 124, /* }} */ 125: 125, /* ~~ */ 126: 126,
-    };
-    const layout_j2u = {
-        /*    */ 32: 32,   /* !! */ 33: 33,   /* "@ */ 34: 64,   /* ## */ 35: 35,
-        /* $$ */ 36: 36,   /* %% */ 37: 37,   /* &^ */ 38: 94,   /* '& */ 39: 38,
-        /* (* */ 40: 42,   /* )( */ 41: 40,   /* *" */ 42: 34,   /* +: */ 43: 59,
-        /* ,, */ 44: 44,   /* -- */ 45: 45,   /* .. */ 46: 46,   /* // */ 47: 47,
-        /* 00 */ 48: 48,   /* 11 */ 49: 49,   /* 22 */ 50: 50,   /* 33 */ 51: 51,
-        /* 44 */ 52: 52,   /* 55 */ 53: 53,   /* 66 */ 54: 54,   /* 77 */ 55: 55,
-        /* 88 */ 56: 56,   /* 99 */ 57: 57,   /* :' */ 58: 39,   /* ;; */ 59: 59,
-        /* << */ 60: 60,   /* =_ */ 61: 95,   /* >> */ 62: 62,   /* ?? */ 63: 63,
-        /* @/ */ 64: 47,   /* AA */ 65: 65,   /* BB */ 66: 66,   /* CC */ 67: 67,
-        /* DD */ 68: 68,   /* EE */ 69: 69,   /* FF */ 70: 70,   /* GG */ 71: 71,
-        /* HH */ 72: 72,   /* II */ 73: 73,   /* JJ */ 74: 74,   /* KK */ 75: 75,
-        /* LL */ 76: 76,   /* MM */ 77: 77,   /* NN */ 78: 78,   /* OO */ 79: 79,
-        /* PP */ 80: 80,   /* QQ */ 81: 81,   /* RR */ 82: 82,   /* SS */ 83: 83,
-        /* TT */ 84: 84,   /* UU */ 85: 85,   /* VV */ 86: 86,   /* WW */ 87: 87,
-        /* XX */ 88: 88,   /* YY */ 89: 89,   /* ZZ */ 90: 90,   /* [] */ 91: 93,
-        /* \\ */ 92: 92,   /* ]` */ 93: 96,   /* ^= */ 94: 61,   /* __ */ 95: 95,
-        /* `{ */ 96: 123,  /* aa */ 97: 97,   /* bb */ 98: 98,   /* cc */ 99: 99,
-        /* dd */ 100: 100, /* ee */ 101: 101, /* ff */ 102: 102, /* gg */ 103: 103,
-        /* hh */ 104: 104, /* ii */ 105: 105, /* jj */ 106: 106, /* kk */ 107: 107,
-        /* ll */ 108: 108, /* mm */ 109: 109, /* nn */ 110: 110, /* oo */ 111: 111,
-        /* pp */ 112: 112, /* qq */ 113: 113, /* rr */ 114: 114, /* ss */ 115: 115,
-        /* tt */ 116: 116, /* uu */ 117: 117, /* vv */ 118: 118, /* ww */ 119: 119,
-        /* xx */ 120: 120, /* yy */ 121: 121, /* zz */ 122: 122, /* {} */ 123: 125,
-        /* || */ 124: 124, /* }~ */ 125: 126, /* ~+ */ 126: 43,
-    };
-
-
-    // =============== useful function =============== //
+    // ── utility ────────────────────────────────────────────────
     function getRandomArbitary(min, max) {
         return Math.random() * (max - min) + min;
     }
-
     function isnl(e) {
-        if (e.which === 13) {
-            return true;
-        }
-        if (e.ctrlKey && (e.which === 77 || e.which === 109)) {
-            return true;
-        }
-        return false;
+        return e.which === 13 || (e.ctrlKey && (e.which === 77 || e.which === 109));
     }
     function isback(e) {
-        if (e.which === 8) {
-            return true;
-        }
-        if (e.ctrlKey && (e.which === 72 || e.which === 104)) {
-            return true;
-        }
-        return false;
+        return e.which === 8 || (e.ctrlKey && (e.which === 72 || e.which === 104));
     }
     function isignore(e) {
-        return e.which === 8    // bs
-            || e.which === 32   // space
-            || e.which === 39   // quote
-            || e.which === 47;  // slash
+        return e.which === 8 || e.which === 32 || e.which === 39 || e.which === 47;
     }
 
-
-    // =============== ready for start =============== //
-    // wrap all char in question with span
+    // ── prepare text ───────────────────────────────────────────
     $('#question :not(:has(p))').contents()
-    .filter((_, t) => {
-        return t.nodeType === 3;
-    }).each((i, txt) => {
-        $(txt).replaceWith($(txt).text()
-                           .replace(/(.)/g, '<span>$1</span>')
-                           .replace(/<span>-<\/span>\n/g, '<span class="skip">-</span>\n'));
-                           // '-' which is end of line may be connection word
+    .filter((_, t) => t.nodeType === 3)
+    .each((_, txt) => {
+        $(txt).replaceWith(
+            $(txt).text()
+                .replace(/(.)/g, '<span>$1</span>')
+                .replace(/<span>-<\/span>\n/g, '<span class="skip">-</span>\n')
+        );
     });
+    $('#question span:last-child').after('<span class="enter"> </span>');
 
-    $(document).keydown(e => {
-        const keyboard = $('header form#layout [name=keyboard]:checked').val();
-        const layout = $('header form#layout [name=layout]:checked').val();
-        if (keyboard === 'JIS' && layout !== 'QWERTY' && e.which === 48 && e.shiftKey) {
-            $(document).trigger($.Event('keypress', {'which': 41}));
-        }
-    });
-    $(document).keypress(e => {
-        const keyboard = $('header form#layout [name=keyboard]:checked').val();
-        const layout = $('header form#layout [name=layout]:checked').val();
-        if (layout === 'QWERTY') {
-            return;
-        }
-        switch (layout) {
-        case 'Dvorak':
-            if (keyboard === 'JIS') {
-                e.which = layout_j2u[e.which];
-            }
-            e.which = layout_q2d[e.which];
-            break;
-        case 'Colemak':
-            if (keyboard === 'JIS') {
-                e.which = layout_j2u[e.which];
-            }
-            e.which = layout_q2c[e.which];
-            break;
-        default:
-        }
-    });
+    // ── elements & persistent state ────────────────────────────
+    const manCommand  = $('#question').data('command');
+    let   username    = $.cookie('name');
 
-    // append enter dummy span after end of sentence
-    $('#question span:last-child')
-    .after('<span class="enter"> </span>');
+    const questions   = $('#question span:not(:has(*))');
+    const miss        = $('#miss');
+    const rank        = $('#rank');
+    const error       = $('#error .value');
+    const timer       = $('#time .value');
+    const cpmEl       = $('#cpm .value');
+    const accEl       = $('#accuracy .value');
+    const graphCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('cpm-graph'));
 
-    let username = $.cookie('name');
+    // ── per-game state ─────────────────────────────────────────
+    let step, start_time, end_time, interval_id, reviewal_id;
+    let itr_question, question;
+    const appeal = $('<div>', { class: 'ring' });
 
+    let keyStats, typedCount, cpmHistory, questionActiveTime, lastSampleMs;
+    let finalCpm = 0, finalAccuracy = 100;
 
-    // =============== main function =============== //
-    const questions = $('#question span:not(:has(*))'); // all of char
+    // ghost
+    let ghostTimes = null, ghostIntervalId = null;
 
-    const miss  = $('#miss');                           // collection for misstype chars
-    const rank  = $('#rank');                        // record ranking
-    const error = $('#error .value');                   // typo cunter
-    const timer = $('#time .value');                    // timer
-
-    let itr_question;   // iterator for all of char
-    let question;       // now char should type
-
-    let step;
-    let start_time;
-    let end_time;
-    let interval_id;
-    let reviewal_id;
-
-    const appeal = $('<div>', {'class': 'ring'});
-
+    // ── initialize ─────────────────────────────────────────────
     initialize();
 
     function initialize() {
-        step = CLEAN;
+        step          = CLEAN;
+        keyStats      = {};
+        typedCount    = 0;
+        cpmHistory    = [];
+        lastSampleMs  = 0;
+        finalCpm      = 0;
+        finalAccuracy = 100;
+
+        // reload ghost (picks up new personal best after restart)
+        const stored = _loadGhost();
+        ghostTimes = (stored && Array.isArray(stored.times) && stored.times.length === questions.length)
+            ? stored.times : null;
+
+        if (ghostIntervalId) { clearInterval(ghostIntervalId); ghostIntervalId = null; }
+        questions.removeClass('ghost-now');
 
         clearInterval(interval_id);
         clearInterval(reviewal_id);
         start_time = moment();
-        updateTimer();
+        _updateDisplay();
 
-        questions.removeClass('done miss now');
-        questions.css('opacity', '');
-
-        itr_question = questions[Symbol.iterator]();  // iterator for all of char
-        question = $(itr_question.next().value);        // now char should type
+        questions.removeClass('done miss now').css('opacity', '');
+        itr_question = questions[Symbol.iterator]();
+        question = $(itr_question.next().value);
         question.addClass('now');
 
         miss.children().remove();
         error.text('0');
+        cpmEl.text('---');
+        accEl.text('---%');
 
         $('#option button#review').attr('disabled', 'disabled');
         $('#option button#restart').removeAttr('disabled');
         question.append(appeal);
+
+        if (graphCanvas) graphCanvas.style.display = 'none';
     }
 
-    function updateTimer() {
+    // ── display update ─────────────────────────────────────────
+    function _updateDisplay() {
         end_time = moment();
         timer.text(moment(end_time - start_time).format('mm:ss.SS'));
+
+        if (typedCount > 0 && (step & TYPING) && !(step & FINISH)) {
+            const ms = moment() - start_time;
+            if (ms > 0) {
+                const cpm = Math.round(typedCount * 60000 / ms);
+                cpmEl.text(cpm);
+                const att = typedCount + (+error.text());
+                accEl.text((att > 0 ? (typedCount / att * 100).toFixed(1) : '100.0') + '%');
+
+                // 5秒ごとにグラフ用データを記録
+                if (ms - lastSampleMs >= 5000) {
+                    cpmHistory.push({ elapsed: Math.round(ms), cpm });
+                    lastSampleMs = ms;
+                }
+            }
+        }
     }
 
+    // ── game start ─────────────────────────────────────────────
     function start_type() {
-        step |= TYPING;
-        start_time = moment();
-        interval_id = setInterval(updateTimer, 50);
+        step               |= TYPING;
+        start_time          = moment();
+        questionActiveTime  = moment();
+        lastSampleMs        = 0;
+        // 開始点（グラフが常に2点以上になるよう保証）
+        cpmHistory.push({ elapsed: 0, cpm: 0 });
+        interval_id         = setInterval(_updateDisplay, 50);
         appeal.remove();
+        _startGhost();
     }
 
+    // ── ghost ──────────────────────────────────────────────────
+    function _loadGhost() {
+        try { return JSON.parse(localStorage.getItem('ghost:' + manCommand) || 'null'); }
+        catch { return null; }
+    }
+
+    // ゴースト再生：review ボタンと同じカーソル方式で並走
+    function _startGhost() {
+        if (!ghostTimes) return;
+        let pos = 0;
+        const ghostStart = moment();
+
+        ghostIntervalId = setInterval(() => {
+            const elapsed = moment() - ghostStart;
+            let moved = false;
+            while (pos < ghostTimes.length && ghostTimes[pos] <= elapsed) {
+                questions.eq(pos).removeClass('ghost-now');
+                pos++;
+                moved = true;
+            }
+            if (moved && pos < questions.length) {
+                questions.eq(pos).addClass('ghost-now');
+            }
+            if (pos >= ghostTimes.length) {
+                clearInterval(ghostIntervalId);
+                ghostIntervalId = null;
+            }
+        }, 50);
+    }
+
+    function _saveGhost(gameTimeMs) {
+        const stored = _loadGhost();
+        if (!stored || gameTimeMs < stored.time) {
+            const times = questions.toArray().map(q => +($(q).attr('time') || 0));
+            localStorage.setItem('ghost:' + manCommand, JSON.stringify({
+                time: Math.round(gameTimeMs),
+                times,
+            }));
+        }
+    }
+
+    // ── game finish ────────────────────────────────────────────
     function finish_type() {
         step |= FINISH;
         clearInterval(interval_id);
-        updateTimer();
-        questions.animate({'opacity': 1}, 'slow', 'easeInQuad');
+        if (ghostIntervalId) { clearInterval(ghostIntervalId); ghostIntervalId = null; }
+        questions.removeClass('ghost-now');
+        _updateDisplay();
+
+        const elapsed = end_time - start_time;
+        finalCpm      = elapsed > 0 ? Math.round(typedCount * 60000 / elapsed) : 0;
+        const att     = typedCount + (+error.text());
+        finalAccuracy = att > 0 ? Math.round(typedCount / att * 1000) / 10 : 100;
+        cpmEl.text(finalCpm);
+        accEl.text(finalAccuracy + '%');
+        if (typedCount > 0 && elapsed > 0) {
+            cpmHistory.push({ elapsed: Math.round(elapsed), cpm: finalCpm });
+        }
+
+        _saveGhost(elapsed);
+        setTimeout(_drawGraph, 100);
+
+        questions.animate({ opacity: 1 }, 'slow', 'easeInQuad');
         $('#option button#restart').attr('disabled', 'disabled');
 
-        const name = new Array();
+        // name entry row in ranking
+        const nameSpans = [];
         if (username) {
-            for (let i = 0; i < username.length; ++i) {
-                name.push(
-                    $('<span>', {'text': username[i]})
-                );
+            for (let i = 0; i < username.length; i++) {
+                nameSpans.push($('<span>', { text: username[i] }));
             }
         }
-        name.push($('<span>', {
-            'text': ' ',
-            'class': 'enter now',
-        }));
-        name.push($('<span>', {
-            'text': 'your name.',
-            'class': 'yet'
-        }));
+        nameSpans.push($('<span>', { text: ' ', class: 'enter now' }));
+        nameSpans.push($('<span>', { text: 'your name.', class: 'yet' }));
 
-        const my = newRecord({
-            'name': name,
-            'time': end_time - start_time,
-            'error': +error.text(),
-        }, true);
+        const my = _newRecord({ name: nameSpans, time: elapsed, error: +error.text(), cpm: finalCpm }, true);
         if (my.hasClass('out')) {
-            my.insertAfter(rank.find('ol > li').last())
-            .hide().show(500);
+            my.insertAfter(rank.find('ol > li').last()).hide().show(500);
         }
-
         if (rank.offset().top + rank.height() > $(window).height()) {
-            $('body,html').animate({'scrollTop': rank.offset().top}, 800, 'swing');
+            $('body,html').animate({ scrollTop: rank.offset().top }, 800, 'swing');
         }
     }
 
-    function newRecord(result, my) {
+    function _newRecord(result, my) {
         const dom = $('<li>')
-        .append(
-            $('<div>', {
-                'class': 'inline-2 name'
-            })
-            .append(result.name)
-        )
-        .append(
-            $('<div>', {
-                't': result.time,
-                'text': moment(+result.time).format('mm:ss.SS'),
-                'class': 'inline-2 time'
-            })
-        )
-        .append(
-            $('<div>', {
-                'text': result.error,
-                'class': 'inline-2 time'
-            })
-        );
-        if (my) {
-            dom.addClass('my');
-        }
+            .append($('<div>', { class: 'inline-2 name' }).append(result.name))
+            .append($('<div>', { t: result.time, text: moment(+result.time).format('mm:ss.SS'), class: 'inline-2 time' }))
+            .append($('<div>', { text: result.error + ' err', class: 'inline-1 error' }))
+            .append($('<div>', { text: (result.cpm || 0) + ' CPM', class: 'inline-2 cpm' }));
+        if (my) dom.addClass('my');
 
-        let best = false;
-        const ranks = rank.find('ol > li:not(.out)');
-        ranks.each((i, r) => {
-            const record = $(r);
-            const time = record.children('.time').attr('t');
-            const error = record.children('.error');
-            if (result.time < time || result.time - time === 0 && +result.error <= +error.text()) {
-                dom.insertBefore(record)
-                .hide().show(500);
-                best = true;
-
-                ranks.last()
-                .addClass('out')
-                .hide(500, () => ranks.last().remove());
-
-
+        let placed = false;
+        const rows = rank.find('ol > li:not(.out)');
+        rows.each((_, r) => {
+            const rec = $(r);
+            const t   = +rec.children('.time').attr('t');
+            const e   = parseInt(rec.children('.error').text()) || 0;
+            if (result.time < t || (result.time === t && result.error <= e)) {
+                dom.insertBefore(rec).hide().show(500);
+                placed = true;
+                // 最下位を out に
+                const last = rank.find('ol > li:not(.out)').last();
+                last.addClass('out').hide(500, () => last.remove());
                 return false;
             }
         });
-        if (!best) {
-            dom.addClass('out');
-        }
+        if (!placed) dom.addClass('out');
         return dom;
     }
 
-    function nextChar() {
-        question.attr('time', moment() - start_time);
-        question.addClass('done');
-        question.removeClass('now');
+    // ── CPM graph ──────────────────────────────────────────────
+    function _drawGraph() {
+        if (!graphCanvas || cpmHistory.length < 2) return;
+        graphCanvas.style.display = 'block';
+        const W = graphCanvas.width, H = graphCanvas.height;
+        const ctx = graphCanvas.getContext('2d');
+        ctx.clearRect(0, 0, W, H);
 
-        const dx = getRandomArbitary(-30, +30);
-        const dy = getRandomArbitary(250, 350);
-        const q = question.clone();
-        const p = question.position();
-        q.css({'left': p.left, 'top': p.top})
-        .appendTo('#drop')
-        .animate({'left': '+=' + dx + 'px'}, {
-            'duration': 1000,
-            'queue': false
-        })
-        .animate({'top': '+=' + dy + 'px'}, {
-            'duration': 1000,
-            'queue': false,
-            'easing': 'easeInOutBack'
-        })
-        .fadeOut(700, 'easeInCubic', () => {q.remove();});
+        const maxCpm  = Math.ceil(Math.max(...cpmHistory.map(p => p.cpm)) * 1.15 / 10) * 10 || 60;
+        const totalMs = cpmHistory[cpmHistory.length - 1].elapsed;
 
-        question.css({'opacity': 0.1});
+        // background
+        ctx.fillStyle = 'rgba(240,248,255,0.9)';
+        ctx.fillRect(0, 0, W, H);
 
-        const nq = itr_question.next();
-        if (nq.done) {
-            finish_type();
+        // grid
+        const gridStep = maxCpm <= 120 ? 20 : 50;
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 1;
+        ctx.font = '11px monospace';
+        for (let w = 0; w <= maxCpm; w += gridStep) {
+            const y = H - (w / maxCpm) * H;
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+            ctx.fillStyle = '#aaa';
+            ctx.fillText(w, 3, y - 2);
         }
-        question = $(nq.value);
-        question.addClass('now');
-        if (question.hasClass('skip')) {
-            nextChar();
+
+        // ghost reference line
+        const ghost = _loadGhost();
+        if (ghost && ghost.time > 0) {
+            const gCpm = Math.round(typedCount * 60000 / ghost.time);
+            const gy   = H - (gWpm / maxCpm) * H;
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,140,0,0.75)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+            ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+            ctx.restore();
+            ctx.fillStyle = 'rgba(255,140,0,0.9)';
+            ctx.fillText('ghost ' + gCpm + ' CPM', W - 130, gy - 3);
         }
+
+        // user CPM line
+        ctx.strokeStyle = 'royalblue'; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        cpmHistory.forEach(({ elapsed, cpm }, i) => {
+            const x = (elapsed / totalMs) * W;
+            const y = H - (cpm / maxCpm) * H;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = '#333'; ctx.font = 'bold 12px monospace';
+        ctx.fillText('CPM', 3, 14);
     }
 
+    // ── save session to localStorage ───────────────────────────
+    function _saveSession(name) {
+        let sessions = [];
+        try { sessions = JSON.parse(localStorage.getItem(SESSIONS_KEY) || '[]'); } catch {}
+        sessions.unshift({
+            man: manCommand, name,
+            time: Math.round(end_time - start_time),
+            chars: typedCount,
+            error: +error.text(),
+            cpm: finalCpm,
+            accuracy: finalAccuracy,
+            date: Date.now(),
+            keyStats,
+            cpmHistory,
+        });
+        if (sessions.length > SESSION_MAX) sessions.length = SESSION_MAX;
+        localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+    }
+
+    // ── save milestones to localStorage ────────────────────────
+    function _saveMilestones(name) {
+        const key = 'typing-man:milestones:' + name;
+        let ms = {};
+        try { ms = JSON.parse(localStorage.getItem(key) || '{}'); } catch {}
+        const now = Date.now();
+
+        // 最高 CPM 更新
+        if (!ms.cpmMax || finalCpm > ms.cpmMax.cpm) {
+            ms.cpmMax = { date: now, man: manCommand, cpm: finalCpm };
+        }
+        // 初回プレイ記録
+        if (!ms.firstPlay) {
+            ms.firstPlay = { date: now, man: manCommand };
+        }
+        // CPM マイルストーン（初達成のみ）
+        if (!ms.cpmMilestones) ms.cpmMilestones = {};
+        [100, 200, 300, 400, 500].forEach(thresh => {
+            if (finalCpm >= thresh && !ms.cpmMilestones[thresh]) {
+                ms.cpmMilestones[thresh] = { date: now, man: manCommand, cpm: finalCpm };
+            }
+        });
+
+        localStorage.setItem(key, JSON.stringify(ms));
+    }
+
+    // ── next char ──────────────────────────────────────────────
+    function nextChar() {
+        const elapsed = Math.round(moment() - start_time);
+
+        if (!question.hasClass('skip') && !question.hasClass('enter')) {
+            const reaction = questionActiveTime ? Math.round(moment() - questionActiveTime) : 0;
+            const ch = question.text();
+            if (!keyStats[ch]) keyStats[ch] = { times: [], misses: 0 };
+            keyStats[ch].times.push(reaction);
+            if (keyStats[ch].times.length > 5) keyStats[ch].times.shift();
+            typedCount++;
+        }
+
+        question.attr('time', elapsed).addClass('done').removeClass('now ghost-now');
+
+        const dx = getRandomArbitary(-30, 30);
+        const dy = getRandomArbitary(250, 350);
+        const cl = question.clone().removeClass('ghost-now');
+        const p  = question.position();
+        cl.css({ left: p.left, top: p.top })
+            .appendTo('#drop')
+            .animate({ left: '+=' + dx + 'px' }, { duration: 1000, queue: false })
+            .animate({ top:  '+=' + dy + 'px' }, { duration: 1000, queue: false, easing: 'easeInOutBack' })
+            .fadeOut(700, 'easeInCubic', () => cl.remove());
+        question.css({ opacity: 0.1 });
+
+        const nq = itr_question.next();
+        if (nq.done) { finish_type(); }
+        question = $(nq.value);
+        question.addClass('now');
+        questionActiveTime = moment();
+        if (question.hasClass('skip')) { nextChar(); }
+    }
+
+    // ── key handlers ───────────────────────────────────────────
     $(document).keydown(e => {
         if (step & TYPING) {
             if (!(step & FINISH)) {
                 if (isback(e)) {
-                    if (miss.children().length) {
-                        miss.children().last().remove();    // delete miss
-                    }
+                    if (miss.children().length) miss.children().last().remove();
                     return false;
                 } else if (isnl(e)) {
-                    if (!miss.children().length && !question.next().length) {
-                        nextChar();
-                    }
+                    if (!miss.children().length && !question.next().length) nextChar();
                     return false;
                 }
             } else {
-                const name = rank.find('ol > li.my .name');
+                const nameEl = rank.find('ol > li.my .name');
                 if (isback(e)) {
-                    if (name.children(':not(.enter):not(.yet)').length) {
-                        name.children(':not(.enter):not(.yet)').last().remove();    // delete miss
-                    }
+                    nameEl.children(':not(.enter):not(.yet)').last().remove();
                     return false;
                 } else if (isnl(e)) {
                     step &= ~TYPING;
-                    name.children('.enter, .yet').remove();
+                    nameEl.children('.enter, .yet').remove();
+                    const submittedName = nameEl.text();
+
+                    _saveSession(submittedName);
+                    _saveMilestones(submittedName);
+
                     $.ajax({
-                        'type': 'POST',
-                        'dataType': 'text',
-                        'data': {
-                            'id': socket.id,
-                            'name': name.text(),
-                            'time': end_time - start_time,
-                            'error': error.text()
-                        },
-                        'error': (err) => {
-                            const message = $('<p>', {'text': 'BadRequest!!'});
-                            message.insertAfter($('#info p').last())
-                            .hide().show(500)
-                            .delay(1000, () =>
-                                   rank.find('ol > li.my').css({'color': 'lightgrey'}))
-                            .hide(200, () => message.remove());
+                        type: 'POST',
+                        contentType: 'application/json',
+                        dataType: 'text',
+                        data: JSON.stringify({
+                            name:     submittedName,
+                            time:     Math.round(end_time - start_time),
+                            error:    +error.text(),
+                            cpm:      finalCpm,
+                            accuracy: finalAccuracy,
+                        }),
+                        error: () => {
+                            const msg = $('<p>', { text: 'BadRequest!!' });
+                            msg.insertAfter($('#info p').last()).hide().show(500)
+                                .delay(1000).hide(200, () => msg.remove());
                         }
                     });
 
-                    username = name.text();
+                    username = submittedName;
                     $.cookie('name', username);
                     $('#option button').removeAttr('disabled');
-                    const out = rank.find('ol > li.my.out');
-                    out.hide(200, () => out.remove());
+
+                    // 名前をスタッツページへのリンクに変換
+                    nameEl.html($('<a>', {
+                        href: '/user/' + encodeURIComponent(submittedName),
+                        text: submittedName,
+                    }));
+
+                    rank.find('ol > li.my.out').hide(200, function() { $(this).remove(); });
                     rank.find('li.my').removeClass('my');
+
                     return false;
                 }
             }
@@ -402,45 +440,37 @@ $(() => {
     });
 
     $(document).keypress(e => {
-        if (e.which == 0) {
-            return true;
-        }
-        if (step === CLEAN && !isignore(e)) {
-            start_type();
-        }
+        if (e.which === 0) return true;
+        if (step === CLEAN && !isignore(e)) start_type();
 
         if (step & TYPING) {
             if (!(step & FINISH)) {
-                if (question.text() === String.fromCharCode(e.which)) {     // incorrect type
-                    if (!miss.children().length && question.next().length) {
-                        nextChar();
-                    }
-                } else {                                                    // incorrect type
-                    error.text(+error.text() + 1);                          // increment miss count
+                if (question.text() === String.fromCharCode(e.which)) {
+                    if (!miss.children().length && question.next().length) nextChar();
+                } else {
+                    error.text(+error.text() + 1);
                     question.addClass('miss');
 
-                    const p = question.position();
-                    miss.css({'left': p.left, 'top': p.top})                        // set position
-                    .append(question.clone().text(String.fromCharCode(e.which)));   // add miss
+                    const ch = question.text();
+                    if (!keyStats[ch]) keyStats[ch] = { times: [], misses: 0 };
+                    keyStats[ch].misses++;
+
+                    const pos = question.position();
+                    miss.css({ left: pos.left, top: pos.top })
+                        .append(question.clone().removeClass('ghost-now').text(String.fromCharCode(e.which)));
                 }
             } else {
-                const name = rank.find('ol > li.my .name');
-                if (name.children(':not(.enter):not(.yet)').length < 12) {
-                    name.children('.enter').before(
-                        $('<span>', {'text': String.fromCharCode(e.which)})
-                    );
+                const nameEl = rank.find('ol > li.my .name');
+                if (nameEl.children(':not(.enter):not(.yet)').length < 12) {
+                    nameEl.children('.enter').before($('<span>', { text: String.fromCharCode(e.which) }));
                 }
             }
         }
 
-
-        if (step & TYPING) {
-            if (isignore(e)) { // space, slash
-                return false;
-            }
-        }
+        if ((step & TYPING) && isignore(e)) return false;
     });
 
+    // ── buttons ────────────────────────────────────────────────
     $('#option button#restart').click(() => {
         initialize();
         question.focus();
@@ -451,35 +481,26 @@ $(() => {
         start_time = moment();
         questions.removeClass('done');
 
-        const itr = questions[Symbol.iterator]();  // iterator for all of char
-        let q = $(itr.next().value);        // now char should type
+        const itr = questions[Symbol.iterator]();
+        let q = $(itr.next().value);
         q.addClass('now');
-
-        const t = timer.text();
+        const savedTime = timer.text();
 
         reviewal_id = setInterval(() => {
-            updateTimer();
+            end_time = moment();
+            timer.text(moment(end_time - start_time).format('mm:ss.SS'));
             if (+q.attr('time') < moment() - start_time) {
-                q.addClass('done');
-                q.removeClass('now');
+                q.addClass('done').removeClass('now');
                 const nq = itr.next();
                 if (nq.done) {
                     $('#option button#review').removeAttr('disabled');
                     clearInterval(reviewal_id);
-                    timer.text(t);
+                    timer.text(savedTime);
+                    return;
                 }
                 q = $(nq.value);
                 q.addClass('now');
             }
         }, 50);
     });
-
-    const socket = io.connect();
-    socket.on('record:new', data => {
-        if (data.id !== socket.id) {
-            data.time = +data.time;
-            newRecord(data, false);
-        }
-    });
 });
-

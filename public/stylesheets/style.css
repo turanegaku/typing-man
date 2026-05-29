@@ -120,6 +120,12 @@ button.default:not(:disabled):active, #selection a[href]:not(:disabled):active {
   }
 }
 
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 header h1 {
   display: inline-block;
 }
@@ -129,61 +135,17 @@ header h1 a {
   text-decoration: none;
 }
 
-header form#layout {
-  float: right;
-}
-
-header form#layout section {
-  display: inline-block;
-}
-
-header form#layout .chainer {
-  margin: 0 5px;
-  padding: 0 5px;
-  background-color: mistyrose;
-}
-
-header form#layout label {
+#user-nav a {
   font-size: 1.8vw;
+  color: midnightblue;
+  text-decoration: none;
+  opacity: 0.65;
+  white-space: nowrap;
 }
 
-header form#layout input[type=radio] {
-  display: none;
-}
-
-header form#layout input[type=radio] + label {
-  position: relative;
-  cursor: pointer;
-  padding: 6px 12px;
-  margin: 5px;
-  border: 1px solid transparent;
-  border-radius: 2px;
-}
-
-header form#layout input[type=radio]:checked + label {
-  transition: top .5s, background-color .5s, color .5s, box-shadow .5s;
-  transition: opacity .3s;
-  top: -2px;
-  font-weight: bold;
-  background-color: deepskyblue;
-  color: azure;
-  border-color: aliceblue;
-  box-shadow: 0px 1px 1px 1px grey;
-}
-
-header form#layout input[type=radio]:not(:checked) + label {
-  transition: top .2s, background-color .2s, color .2s, box-shadow .2s;
-  transition: opacity .3s;
-  top: 0px;
-  background-color: whitesmoke;
-  border-color: lightblue;
-  color: grey;
-}
-
-header form#layout input[type=radio]:disabled + label {
-  transition: opacity .2s;
-  opacity: .2;
-  cursor: default;
+#user-nav a:hover {
+  opacity: 1;
+  text-decoration: underline;
 }
 
 #question {
