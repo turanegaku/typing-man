@@ -242,7 +242,7 @@ $(() => {
 <hr>
 <div class="sr-actions">
   <button id="sr-btn-dl"      class="sr-action-btn">⬇️ 画像をダウンロード</button>
-  <button id="sr-btn-twitter" class="sr-action-btn sr-action-btn--tw">𝕏 Twitter でシェア</button>
+  <button id="sr-btn-twitter" class="sr-action-btn sr-action-btn--tw" style="display:none">𝕏 Twitter でシェア</button>
 </div>`;
     }
 

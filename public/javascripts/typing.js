@@ -45,14 +45,15 @@ $(() => {
     const timer       = $('#time .value');
     const cpmEl       = $('#cpm .value');
     const accEl       = $('#accuracy .value');
-    const graphCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('cpm-graph'));
+    // お題の総文字数（10字以下は統計対象外）
+    const totalQuestionChars = questions.length;
 
     // ── per-game state ─────────────────────────────────────────
     let step, start_time, end_time, interval_id, reviewal_id;
     let itr_question, question;
     const appeal = $('<div>', { class: 'ring' });
 
-    let keyStats, typedCount, cpmHistory, questionActiveTime, lastSampleMs;
+    let keyStats, typedCount, questionActiveTime;
     let finalCpm = 0, finalAccuracy = 100;
 
     // ghost
@@ -65,8 +66,6 @@ $(() => {
         step          = CLEAN;
         keyStats      = {};
         typedCount    = 0;
-        cpmHistory    = [];
-        lastSampleMs  = 0;
         finalCpm      = 0;
         finalAccuracy = 100;
 
@@ -96,8 +95,6 @@ $(() => {
         $('#option button#review').attr('disabled', 'disabled');
         $('#option button#restart').removeAttr('disabled');
         question.append(appeal);
-
-        if (graphCanvas) graphCanvas.style.display = 'none';
     }
 
     // ── display update ─────────────────────────────────────────
@@ -112,12 +109,6 @@ $(() => {
                 cpmEl.text(cpm);
                 const att = typedCount + (+error.text());
                 accEl.text((att > 0 ? (typedCount / att * 100).toFixed(1) : '100.0') + '%');
-
-                // 5秒ごとにグラフ用データを記録
-                if (ms - lastSampleMs >= 5000) {
-                    cpmHistory.push({ elapsed: Math.round(ms), cpm });
-                    lastSampleMs = ms;
-                }
             }
         }
     }
@@ -127,9 +118,6 @@ $(() => {
         step               |= TYPING;
         start_time          = moment();
         questionActiveTime  = moment();
-        lastSampleMs        = 0;
-        // 開始点（グラフが常に2点以上になるよう保証）
-        cpmHistory.push({ elapsed: 0, cpm: 0 });
         interval_id         = setInterval(_updateDisplay, 50);
         appeal.remove();
         _startGhost();
@@ -190,12 +178,8 @@ $(() => {
         finalAccuracy = att > 0 ? Math.round(typedCount / att * 1000) / 10 : 100;
         cpmEl.text(finalCpm);
         accEl.text(finalAccuracy + '%');
-        if (typedCount > 0 && elapsed > 0) {
-            cpmHistory.push({ elapsed: Math.round(elapsed), cpm: finalCpm });
-        }
 
         _saveGhost(elapsed);
-        setTimeout(_drawGraph, 100);
 
         questions.animate({ opacity: 1 }, 'slow', 'easeInQuad');
         $('#option button#restart').attr('disabled', 'disabled');
@@ -246,59 +230,6 @@ $(() => {
         return dom;
     }
 
-    // ── CPM graph ──────────────────────────────────────────────
-    function _drawGraph() {
-        if (!graphCanvas || cpmHistory.length < 2) return;
-        graphCanvas.style.display = 'block';
-        const W = graphCanvas.width, H = graphCanvas.height;
-        const ctx = graphCanvas.getContext('2d');
-        ctx.clearRect(0, 0, W, H);
-
-        const maxCpm  = Math.ceil(Math.max(...cpmHistory.map(p => p.cpm)) * 1.15 / 10) * 10 || 60;
-        const totalMs = cpmHistory[cpmHistory.length - 1].elapsed;
-
-        // background
-        ctx.fillStyle = 'rgba(240,248,255,0.9)';
-        ctx.fillRect(0, 0, W, H);
-
-        // grid
-        const gridStep = maxCpm <= 120 ? 20 : 50;
-        ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 1;
-        ctx.font = '11px monospace';
-        for (let w = 0; w <= maxCpm; w += gridStep) {
-            const y = H - (w / maxCpm) * H;
-            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-            ctx.fillStyle = '#aaa';
-            ctx.fillText(w, 3, y - 2);
-        }
-
-        // ghost reference line
-        const ghost = _loadGhost();
-        if (ghost && ghost.time > 0) {
-            const gCpm = Math.round(typedCount * 60000 / ghost.time);
-            const gy   = H - (gWpm / maxCpm) * H;
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255,140,0,0.75)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
-            ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
-            ctx.restore();
-            ctx.fillStyle = 'rgba(255,140,0,0.9)';
-            ctx.fillText('ghost ' + gCpm + ' CPM', W - 130, gy - 3);
-        }
-
-        // user CPM line
-        ctx.strokeStyle = 'royalblue'; ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        cpmHistory.forEach(({ elapsed, cpm }, i) => {
-            const x = (elapsed / totalMs) * W;
-            const y = H - (cpm / maxCpm) * H;
-            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-
-        ctx.fillStyle = '#333'; ctx.font = 'bold 12px monospace';
-        ctx.fillText('CPM', 3, 14);
-    }
-
     // ── save session to localStorage ───────────────────────────
     function _saveSession(name) {
         let sessions = [];
@@ -312,7 +243,7 @@ $(() => {
             accuracy: finalAccuracy,
             date: Date.now(),
             keyStats,
-            cpmHistory,
+            short: totalQuestionChars <= 10,
         });
         if (sessions.length > SESSION_MAX) sessions.length = SESSION_MAX;
         localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
@@ -320,6 +251,9 @@ $(() => {
 
     // ── save milestones to localStorage ────────────────────────
     function _saveMilestones(name) {
+        // 10字以下のお題はマイルストーンに記録しない
+        if (totalQuestionChars <= 10) return;
+
         const key = 'typing-man:milestones:' + name;
         let ms = {};
         try { ms = JSON.parse(localStorage.getItem(key) || '{}'); } catch {}
