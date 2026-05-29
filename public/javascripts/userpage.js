@@ -41,12 +41,37 @@ $(() => {
     const uniqueDates = new Set(mine.map(s => new Date(s.date).toDateString()));
     const totalDays   = uniqueDates.size;
 
-    // お題別プレイ回数（未プレイ含む全お題）
+    // お題別プレイ回数（未プレイ含む全お題、プレイ回数降順・最大15件）
     const byMan = {};
     allMans.forEach(m => { byMan[m] = 0; });
     mine.forEach(s => { if (s.man) byMan[s.man] = (byMan[s.man] || 0) + 1; });
-    const manEntries = Object.entries(byMan).sort((a, b) => b[1] - a[1]);
-    const maxCount   = manEntries.length ? Math.max(1, manEntries[0][1]) : 1;
+    const manEntries = Object.entries(byMan)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 15);
+    const maxCount = Math.max(1, ...manEntries.map(([, c]) => c));
+
+    // 苦手キー集計（ミス割合・平均反応時間を独立して集計）
+    const keyAgg = {};
+    mine.forEach(s => {
+        if (!s.keyStats) return;
+        Object.entries(s.keyStats).forEach(([ch, stat]) => {
+            if (!keyAgg[ch]) keyAgg[ch] = { misses: 0, hits: 0, times: [] };
+            keyAgg[ch].misses += stat.misses || 0;
+            keyAgg[ch].hits   += (stat.times || []).length;
+            if (stat.times) keyAgg[ch].times.push(...stat.times);
+        });
+    });
+    const keyList = Object.entries(keyAgg).map(([ch, agg]) => {
+        const total    = agg.misses + agg.hits;
+        const missRate = total > 0 ? agg.misses / total : 0;
+        const avgTime  = agg.times.length ? Math.round(agg.times.reduce((a, b) => a + b, 0) / agg.times.length) : 0;
+        return { ch, misses: agg.misses, hits: agg.hits, missRate, avgTime };
+    });
+    const WEAK_N = 5;
+    const weakByMiss = keyList.filter(k => k.misses > 0).sort((a, b) => b.missRate - a.missRate).slice(0, WEAK_N);
+    const weakByTime = keyList.filter(k => k.avgTime > 0).sort((a, b) => b.avgTime - a.avgTime).slice(0, WEAK_N);
+    const maxMissRate = weakByMiss.length ? weakByMiss[0].missRate : 1;
+    const maxAvgTime  = weakByTime.length ? weakByTime[0].avgTime  : 1;
 
     // レーダー値
     const speedVal = Math.min(100, Math.round(cumCpm / 6));
@@ -199,11 +224,50 @@ $(() => {
               <div class="sr-bar-track">
                 ${cnt > 0
                     ? `<div class="sr-bar-fill" data-w="${pct}" style="width:2%">${cnt}回</div>`
-                    : `<div class="sr-bar-zero">0回</div>`
-                }
+                    : `<div class="sr-bar-zero">0回</div>`}
               </div>
             </div>`;
         }).join('')}
+      </div>
+
+      <!-- 苦手キー：二軸別リスト -->
+      <h3 class="sr-sec" style="margin-top:28px">苦手キー</h3>
+      <div class="sr-weak-cols">
+        <!-- ミスが多いキー -->
+        <div class="sr-weak-col">
+          <div class="sr-weak-col-head sr-weak-col-head--miss">ミス率が高い</div>
+          ${weakByMiss.length === 0
+            ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし</p>`
+            : weakByMiss.map((k, i) => {
+                const pct      = Math.max(6, Math.round(k.missRate / maxMissRate * 100));
+                const rateStr  = (k.missRate * 100).toFixed(0) + '%';
+                return `<div class="sr-wk-row">
+                  <span class="sr-wk-rank">${i + 1}</span>
+                  <kbd class="sr-wk-key sr-wk-key--miss">${esc(k.ch)}</kbd>
+                  <div class="sr-wk-track">
+                    <div class="sr-wk-fill sr-wk-fill--miss" style="width:${pct}%">${rateStr}</div>
+                  </div>
+                </div>`;
+              }).join('')
+          }
+        </div>
+        <!-- 反応が遅いキー -->
+        <div class="sr-weak-col">
+          <div class="sr-weak-col-head sr-weak-col-head--time">反応が遅い</div>
+          ${weakByTime.length === 0
+            ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし</p>`
+            : weakByTime.map((k, i) => {
+                const pct = Math.max(6, Math.round(k.avgTime / maxAvgTime * 100));
+                return `<div class="sr-wk-row">
+                  <span class="sr-wk-rank">${i + 1}</span>
+                  <kbd class="sr-wk-key sr-wk-key--time">${esc(k.ch)}</kbd>
+                  <div class="sr-wk-track">
+                    <div class="sr-wk-fill sr-wk-fill--time" style="width:${pct}%">${k.avgTime}ms</div>
+                  </div>
+                </div>`;
+              }).join('')
+          }
+        </div>
       </div>
     </div>
 
@@ -470,6 +534,26 @@ $(() => {
 .sr-milestone { font-size: .88em; color: #444; margin-bottom: 5px; white-space: normal; line-height: 1.5; }
 .sr-muted { color: #ccc; }
 .sr-date  { font-size: .85em; color: #aaa; margin-left: 4px; }
+
+/* ── 苦手キー ── */
+.sr-weak-cols { display: flex; gap: 12px; }
+.sr-weak-col  { flex: 1; min-width: 0; }
+.sr-weak-col-head { font-size: .78em; font-weight: bold; padding: 3px 6px; border-radius: 3px 3px 0 0; margin-bottom: 4px; }
+.sr-weak-col-head--miss { background: #fff3e0; color: #e65100; border-bottom: 2px solid #ffb74d; }
+.sr-weak-col-head--time { background: #fff8e1; color: #f57f17; border-bottom: 2px solid #ffd54f; }
+.sr-wk-row   { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.sr-wk-rank  { width: 14px; font-size: .75em; color: #bbb; text-align: right; flex-shrink: 0; }
+.sr-wk-key   {
+  display: inline-block; min-width: 26px; padding: 1px 4px;
+  border-radius: 3px; font-family: monospace; font-size: .85em;
+  text-align: center; flex-shrink: 0; white-space: pre;
+}
+.sr-wk-key--miss { background: #fff3e0; border: 1px solid #ffb74d; color: #e65100; }
+.sr-wk-key--time { background: #fff8e1; border: 1px solid #ffd54f; color: #f57f17; }
+.sr-wk-track { flex: 1; background: #f0f0f0; border-radius: 3px; overflow: hidden; height: 16px; min-width: 0; }
+.sr-wk-fill  { height: 16px; line-height: 16px; font-size: .72em; padding-left: 4px; white-space: nowrap; border-radius: 3px; }
+.sr-wk-fill--miss { background: linear-gradient(90deg, #ff8f00, #ffb300); color: #fff; }
+.sr-wk-fill--time { background: linear-gradient(90deg, #ffc107, #ffe082); color: #5d4037; }
 
 /* ── 詳細テーブル ── */
 .sr-table { width: 100%; border-collapse: collapse; font-size: .88em; }
