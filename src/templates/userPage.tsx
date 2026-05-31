@@ -1,5 +1,6 @@
 import type { FC } from 'hono/jsx';
 import { Layout } from './layout.js';
+import { InfoSection } from './infoSection.js';
 import { mans } from '../data/mans/index.js';
 
 type UserPageProps = { username: string };
@@ -15,6 +16,7 @@ export const UserPage: FC<UserPageProps> = ({ username }) => (
       />
     }
   >
+    <InfoSection />
     <div
       id="user-stats"
       data-mans={JSON.stringify(mans.map((m) => m.command))}

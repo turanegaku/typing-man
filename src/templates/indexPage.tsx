@@ -1,5 +1,6 @@
 import type { FC } from 'hono/jsx';
 import { Layout } from './layout.js';
+import { InfoSection } from './infoSection.js';
 import type { RankRecord } from '../data/mans/types.js';
 
 type ManItem = { command: string; displayName?: string };
@@ -21,10 +22,9 @@ export const IndexPage: FC<IndexPageProps> = ({ mans, bests, tutorial }) => {
         </>
       }
     >
-      <div id="info">
+      <InfoSection>
         <p>問題を選択してね</p>
-      </div>
-      <hr />
+      </InfoSection>
       <div id="selection" data-tutorial={tutorial ? 'true' : undefined}>
         {mans.map(({ command, displayName }) => {
           const label = displayName || command;
