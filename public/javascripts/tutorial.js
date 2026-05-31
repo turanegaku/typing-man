@@ -1,31 +1,6 @@
 /* global $ location document */
 
 $(() => {
-    $('<style>', {
-        text: `
-.tutorial-overlay {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.97);
-    border: 2px solid #a5d6a7;
-    border-radius: 12px;
-    padding: 24px 32px;
-    z-index: 9999;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-    text-align: center;
-    max-width: 480px;
-    width: 90%;
-    color: #2e7d32;
-    font-size: 1em;
-    line-height: 1.6;
-}
-.tutorial-overlay p { margin: 0 0 6px; }
-.tutorial-overlay-hint { font-size: .78em !important; color: #aaa !important; margin-top: 14px !important; }
-        `
-    }).appendTo('head');
-
     function showOverlay(html, autoDismissMs) {
         const overlay = $('<div>', {
             class: 'tutorial-overlay',
