@@ -28,6 +28,7 @@ $(() => {
 
     const selections = sel_f;
     const all = $('#selection a');
+    const targetPrefix = $('#selection').data('tutorial') ? '/tutorial/' : '/';
 
     selections.each((_, q) => {
         let selection = $(q);
@@ -51,7 +52,7 @@ $(() => {
                 selection = selection.next();
 
                 if (!selection.next().length) {
-                    parent.attr('href', parent.text());
+                    parent.attr('href', targetPrefix + encodeURIComponent(parent.text()));
                     all.removeClass('movable');
                     parent.addClass('movable');
                 }
@@ -69,7 +70,7 @@ $(() => {
     $(document).keydown(e => {
         const link = $('#selection a.movable');
         if (isnl(e)) {
-            if (link.length) location.href = link.text();
+            if (link.length) location.href = link.attr('href') || (targetPrefix + encodeURIComponent(link.text()));
             return false;
         }
     });

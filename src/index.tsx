@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { indexRoute } from './routes/index.js';
 import { manGetRoute, manPostRoute } from './routes/man.js';
+import { tutorialIndexRoute, tutorialManRoute } from './routes/tutorial.js';
 import { userRoute } from './routes/user.js';
 
 type Bindings = {
@@ -11,6 +12,8 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.get('/', indexRoute);
+app.get('/tutorial', tutorialIndexRoute);
+app.get('/tutorial/:man', tutorialManRoute);
 app.get('/user/:username', userRoute);   // /user/:username より前に定義
 app.get('/:man', manGetRoute);
 app.post('/:man', manPostRoute);

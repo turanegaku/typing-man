@@ -4,7 +4,7 @@ $(() => {
     injectStyles();
 
     const SESSIONS_KEY   = 'typing-man:sessions';
-    const username = decodeURIComponent(location.pathname.replace(/^\/user\//, ''));
+    let username = decodeURIComponent(location.pathname.replace(/^\/user\//, ''));
     const container = $('#user-stats');
 
     // サーバーが埋め込んだ全お題リスト
@@ -26,6 +26,43 @@ $(() => {
             '<p><a href="/">ゲームをプレイしてデータを記録しましょう</a></p>'
         );
         return;
+    }
+
+    function usernameDisplayEl(name) {
+        return $('<span>', {
+            id: 'sr-username-display',
+            class: 'sr-username-display',
+            text: name,
+            title: 'クリックで名前を変更',
+        });
+    }
+
+    function refreshHeaderName(name) {
+        $('.sr-head-user').empty().append('ユーザー名：').append(usernameDisplayEl(name));
+    }
+
+    function renameStoredUser(oldName, newName) {
+        sessions.forEach(s => {
+            if (s.name === oldName) s.name = newName;
+        });
+        localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+
+        const oldKey = 'typing-man:milestones:' + oldName;
+        const newKey = 'typing-man:milestones:' + newName;
+        const oldMilestones = localStorage.getItem(oldKey);
+        if (oldMilestones != null) {
+            localStorage.setItem(newKey, oldMilestones);
+            if (oldKey !== newKey) localStorage.removeItem(oldKey);
+        }
+
+        $.cookie('name', newName);
+        const nav = $('#user-nav');
+        if (nav.length) {
+            nav.empty().append($('<a>', {
+                href: '/user/' + encodeURIComponent(newName),
+                text: '👤 ' + newName,
+            }));
+        }
     }
 
     // ── 集計 ─────────────────────────────────────────────────────
@@ -113,6 +150,61 @@ $(() => {
     // ── 描画 ─────────────────────────────────────────────────────
     container.html(buildHTML());
 
+    if (location.search.includes('tutorial=1')) {
+        container.prepend($('<div>', {
+            class: 'sr-tutorial-msg',
+            html: '🎉 ようこそ！このページでいつでも名前を変更できます。（右上のユーザー名をクリック）'
+        }));
+        history.replaceState(null, '', location.pathname);
+    }
+
+    $(document).on('click', '#sr-username-display', function() {
+        const display = $(this);
+        const current = display.text();
+        const input = $('<input>', {
+            type: 'text',
+            value: current,
+            maxlength: 12,
+            class: 'sr-username-input',
+        });
+        let done = false;
+
+        display.replaceWith(input);
+        input.focus().select();
+
+        function restore(name) {
+            if (done) return;
+            done = true;
+            refreshHeaderName(name);
+        }
+
+        function saveRename() {
+            if (done) return;
+            const newName = String(input.val() || '').trim();
+            if (!newName || newName === current) {
+                restore(current);
+                return;
+            }
+
+            done = true;
+            renameStoredUser(current, newName);
+            username = newName;
+            refreshHeaderName(newName);
+            history.pushState(null, '', '/user/' + encodeURIComponent(newName));
+        }
+
+        input.on('keydown', function(e) {
+            if (e.which === 13) {
+                saveRename();
+                return false;
+            }
+            if (e.which === 27) {
+                restore(current);
+                return false;
+            }
+        }).on('blur', saveRename);
+    });
+
     // CPM/CPS トグル
     let showCps = false;
     $('#sr-cpm-toggle').on('click', () => {
@@ -193,7 +285,7 @@ $(() => {
   <!-- オレンジ帯ヘッダー -->
   <div class="sr-head">
     <div class="sr-head-title">タイピング通知表</div>
-    <div class="sr-head-user">ユーザー名：${esc(username)}</div>
+    <div class="sr-head-user">ユーザー名：<span id="sr-username-display" class="sr-username-display" title="クリックで名前を変更">${esc(username)}</span></div>
   </div>
 
   <!-- CPM / CPS トグル + Acc -->
@@ -451,7 +543,26 @@ $(() => {
 }
 .sr-head-title { font-size: 1.9em; font-weight: bold; letter-spacing: .05em; white-space: nowrap; }
 .sr-head-user  { font-size: .9em; opacity: .88; }
-
+.sr-username-display { cursor: pointer; text-decoration: underline dotted; }
+.sr-username-input {
+    color: #fff;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #fff;
+    font-size: inherit;
+    font-family: inherit;
+    outline: none;
+    min-width: 80px;
+}
+.sr-tutorial-msg {
+    background: #fff3cd;
+    border: 1px solid #ffd966;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    font-size: .9em;
+    color: #664d03;
+}
 /* ── CPM / CPS トグル ── */
 .sr-top-stats {
     display: flex;

@@ -7,6 +7,7 @@ const RANK_MAX = 10;
 type ManPageProps = {
   entry: ManEntry;
   ranks: RankRecord[];
+  tutorial?: boolean;
 };
 
 const ManLineEl: FC<{ line: ManLine }> = ({ line }) => {
@@ -38,7 +39,7 @@ function formatTimer(ms: number): string {
 
 const NO_DATA_TIME = 30 * 60 * 1000;
 
-export const ManPage: FC<ManPageProps> = ({ entry, ranks }) => {
+export const ManPage: FC<ManPageProps> = ({ entry, ranks, tutorial }) => {
   // RANK_MAX 件に満たない場合は NoData で埋める
   const filledRanks: RankRecord[] = [...ranks];
   while (filledRanks.length < RANK_MAX) {
@@ -48,7 +49,12 @@ export const ManPage: FC<ManPageProps> = ({ entry, ranks }) => {
   return (
     <Layout
       title="typing-man"
-      scripts={<script type="text/javascript" src="/javascripts/typing.js" />}
+      scripts={
+        <>
+          <script type="text/javascript" src="/javascripts/typing.js" />
+          {tutorial && <script type="text/javascript" src="/javascripts/tutorial.js" />}
+        </>
+      }
     >
       <div id="info">
         <div id="error" class="inline-3">
@@ -83,7 +89,7 @@ export const ManPage: FC<ManPageProps> = ({ entry, ranks }) => {
       </div>
       <hr />
 
-      <div id="question" data-command={entry.command}>
+      <div id="question" data-command={entry.command} data-tutorial={tutorial ? 'true' : undefined}>
         <dl>
           {entry.lines.map((line, i) => (
             <ManLineEl key={i} line={line} />
