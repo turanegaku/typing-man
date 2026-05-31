@@ -8,6 +8,7 @@ import { echo } from './echo.js';
 import { file } from './file.js';
 import { grep } from './grep.js';
 import { helloC } from './helloC.js';
+import { jobs } from './jobs.js';
 import { ls } from './ls.js';
 import { mv } from './mv.js';
 import { pwd } from './pwd.js';
@@ -34,6 +35,7 @@ export const mans: ManEntry[] = [
   file,
   grep,
   helloC,
+  jobs,
   ls,
   mv,
   pwd,
