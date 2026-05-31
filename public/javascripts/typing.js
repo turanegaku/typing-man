@@ -32,7 +32,7 @@ $(() => {
                 .replace(/<span>-<\/span>\n/g, '<span class="skip">-</span>\n')
         );
     });
-    $('#question span:last-child').after('<span class="enter"> </span>');
+    $('#question span:last-child:not(.enter)').after('<span class="enter"> </span>');
 
     // ── elements & persistent state ────────────────────────────
     const manCommand  = $('#question').data('command');
