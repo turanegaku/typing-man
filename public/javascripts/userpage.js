@@ -292,7 +292,7 @@ $(() => {
         return `rgb(${Math.round(255-248*t)},193,${Math.round(7+248*t)})`;
     }
     function buildKeyTrend() {
-        const TOP_N = 5, BOT_N = 3;
+        const TOP_N = 7, BOT_N = 5;
 
         function makeCol(base, axis, sortAsc) {
             const sorted = base.slice().sort((a, b) => {
