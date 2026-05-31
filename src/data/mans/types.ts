@@ -9,6 +9,7 @@ export type ManLine =
 /** お題エントリ */
 export type ManEntry = {
   command: string;
+  displayName?: string;  // ホームページ表示名（省略時は command を使用）
   lines: ManLine[];
 };
 

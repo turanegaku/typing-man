@@ -52,7 +52,7 @@ $(() => {
                 selection = selection.next();
 
                 if (!selection.next().length) {
-                    parent.attr('href', targetPrefix + encodeURIComponent(parent.text()));
+                    parent.attr('href', targetPrefix + encodeURIComponent(parent.data('command') || parent.text()));
                     all.removeClass('movable');
                     parent.addClass('movable');
                 }
@@ -70,7 +70,7 @@ $(() => {
     $(document).keydown(e => {
         const link = $('#selection a.movable');
         if (isnl(e)) {
-            if (link.length) location.href = link.attr('href') || (targetPrefix + encodeURIComponent(link.text()));
+            if (link.length) location.href = link.attr('href') || (targetPrefix + encodeURIComponent(link.data('command') || link.text()));
             return false;
         }
     });

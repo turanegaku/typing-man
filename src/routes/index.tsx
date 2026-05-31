@@ -26,7 +26,7 @@ export async function indexRoute(c: Context<{ Bindings: Bindings }>) {
 
   return c.html(
     <IndexPage
-      mans={mans.map((m) => m.command)}
+      mans={mans.map((m) => ({ command: m.command, displayName: m.displayName }))}
       bests={bests}
     />,
   );

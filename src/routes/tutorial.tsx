@@ -23,7 +23,7 @@ export async function tutorialIndexRoute(c: Context<{ Bindings: Bindings }>) {
 
   const bests = new Map<string, RankRecord>(bestEntries.filter((e): e is [string, RankRecord] => e[1] !== null));
 
-  return c.html(<IndexPage mans={mans.map((m) => m.command)} bests={bests} tutorial={true} />);
+  return c.html(<IndexPage mans={mans.map((m) => ({ command: m.command, displayName: m.displayName }))} bests={bests} tutorial={true} />);
 }
 
 export async function tutorialManRoute(c: Context<{ Bindings: Bindings }>) {
