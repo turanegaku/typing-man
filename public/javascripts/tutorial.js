@@ -26,12 +26,21 @@ $(() => {
         `
     }).appendTo('head');
 
-    function showOverlay(html) {
+    function showOverlay(html, autoDismissMs) {
         const overlay = $('<div>', {
             class: 'tutorial-overlay',
-            html: html + '<p class="tutorial-overlay-hint">何かキーを押して進む</p>',
+            html: autoDismissMs
+                ? html
+                : html + '<p class="tutorial-overlay-hint">何かキーを押して進む</p>',
         });
         $('body').append(overlay);
+
+        if (autoDismissMs) {
+            setTimeout(() => {
+                overlay.fadeOut(200, () => overlay.remove());
+            }, autoDismissMs);
+            return;
+        }
 
         function dismiss(e) {
             if (e.which === 0 || e.which === 16 || e.which === 17 || e.which === 18) return;
@@ -45,7 +54,7 @@ $(() => {
     const isTutorialMan  = /^\/tutorial\/.+/.test(location.pathname);
 
     if (isTutorialHome) {
-        showOverlay('<p>🎓 ようこそ！</p><p>まず <strong>「a」</strong> をタイプして始めましょう。<br>他のお題もいつでも選べます。</p>');
+        showOverlay('<p>🎓 ようこそ！</p><p>まず <strong>「a」</strong> をタイプして始めましょう。</p>');
 
         $('#selection').on('click', 'a', function(e) {
             e.preventDefault();
@@ -56,12 +65,13 @@ $(() => {
     }
 
     if (isTutorialMan) {
-        showOverlay('<p>🎓 チュートリアル</p><p>タイピングが終わったら、<br>あなたの <strong>名前</strong> を入力して Enter を押してください。</p>');
+        showOverlay('<p>🎓 チュートリアル</p><p>キーを入力してゲームを開始しましょう！</p>');
 
         $(document).on('typing-man:submitted', (_, name) => {
+            showOverlay('<p>✅ 名前を登録しました：<strong>' + name + '</strong></p><p>ユーザーページでいつでも変更できます。</p>', 2000);
             setTimeout(() => {
                 location.href = '/user/' + encodeURIComponent(name) + '?tutorial=1';
-            }, 600);
+            }, 2000);
         });
     }
 });
