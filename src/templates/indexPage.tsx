@@ -5,19 +5,25 @@ import type { RankRecord } from '../data/mans/types.js';
 type IndexPageProps = {
   mans: string[];
   bests: Map<string, RankRecord>;
+  tutorial?: boolean;
 };
 
-export const IndexPage: FC<IndexPageProps> = ({ mans, bests }) => {
+export const IndexPage: FC<IndexPageProps> = ({ mans, bests, tutorial }) => {
   return (
     <Layout
       title="typing-man"
-      scripts={<script type="text/javascript" src="/javascripts/selection.js" />}
+      scripts={
+        <>
+          <script type="text/javascript" src="/javascripts/selection.js" />
+          {tutorial && <script type="text/javascript" src="/javascripts/tutorial.js" />}
+        </>
+      }
     >
       <div id="info">
         <p>問題を選択してね</p>
       </div>
       <hr />
-      <div id="selection">
+      <div id="selection" data-tutorial={tutorial ? 'true' : undefined}>
         {mans.map((man) => {
           const best = bests.get(man);
           return (

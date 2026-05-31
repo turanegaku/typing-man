@@ -201,6 +201,9 @@ $(() => {
             my.insertAfter(rank.find('ol > li').last()).hide().show(500);
         }
         $('body,html').animate({ scrollTop: rank.offset().top }, 800, 'swing');
+        if (username) {
+            setTimeout(() => { _submitScore(); }, 500);
+        }
     }
 
     function _newRecord(result, my) {
@@ -278,6 +281,53 @@ $(() => {
         localStorage.setItem(key, JSON.stringify(ms));
     }
 
+    function _submitScore() {
+        if (!(step & FINISH) || !(step & TYPING)) return false;
+
+        const nameEl = rank.find('ol > li.my .name');
+        const submittedName = nameEl.clone().children('.enter, .yet').remove().end().text().trim();
+        if (!submittedName) return false;
+
+        step &= ~TYPING;
+        nameEl.children('.enter, .yet').remove();
+
+        _saveSession(submittedName);
+        _saveMilestones(submittedName);
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'text',
+            data: JSON.stringify({
+                name:     submittedName,
+                time:     Math.round(end_time - start_time),
+                error:    +error.text(),
+                cpm:      finalCpm,
+                accuracy: finalAccuracy,
+            }),
+            error: () => {
+                const msg = $('<p>', { text: 'BadRequest!!' });
+                msg.insertAfter($('#info p').last()).hide().show(500)
+                    .delay(1000).hide(200, () => msg.remove());
+            }
+        });
+
+        username = submittedName;
+        $.cookie('name', username);
+        $('#option button').removeAttr('disabled');
+
+        nameEl.html($('<a>', {
+            href: '/user/' + encodeURIComponent(submittedName),
+            text: submittedName,
+        }));
+
+        rank.find('ol > li.my.out').hide(200, function() { $(this).remove(); });
+        rank.find('li.my').removeClass('my');
+
+        $(document).trigger('typing-man:submitted', [submittedName]);
+        return true;
+    }
+
     // ── next char ──────────────────────────────────────────────
     function nextChar() {
         const elapsed = Math.round(moment() - start_time);
@@ -333,44 +383,7 @@ $(() => {
                     nameEl.children(':not(.enter):not(.yet)').last().remove();
                     return false;
                 } else if (isnl(e)) {
-                    step &= ~TYPING;
-                    nameEl.children('.enter, .yet').remove();
-                    const submittedName = nameEl.text();
-
-                    _saveSession(submittedName);
-                    _saveMilestones(submittedName);
-
-                    $.ajax({
-                        type: 'POST',
-                        contentType: 'application/json',
-                        dataType: 'text',
-                        data: JSON.stringify({
-                            name:     submittedName,
-                            time:     Math.round(end_time - start_time),
-                            error:    +error.text(),
-                            cpm:      finalCpm,
-                            accuracy: finalAccuracy,
-                        }),
-                        error: () => {
-                            const msg = $('<p>', { text: 'BadRequest!!' });
-                            msg.insertAfter($('#info p').last()).hide().show(500)
-                                .delay(1000).hide(200, () => msg.remove());
-                        }
-                    });
-
-                    username = submittedName;
-                    $.cookie('name', username);
-                    $('#option button').removeAttr('disabled');
-
-                    // 名前をスタッツページへのリンクに変換
-                    nameEl.html($('<a>', {
-                        href: '/user/' + encodeURIComponent(submittedName),
-                        text: submittedName,
-                    }));
-
-                    rank.find('ol > li.my.out').hide(200, function() { $(this).remove(); });
-                    rank.find('li.my').removeClass('my');
-
+                    _submitScore();
                     return false;
                 }
             }

@@ -36,7 +36,17 @@ export const Layout: FC<LayoutProps & { children?: any }> = ({
         <script type="text/javascript" src="/static/js/jquery.cookie.js" />
         <script type="text/javascript" src="/static/js/moment.min.js" />
         {scripts}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var s=JSON.parse(localStorage.getItem('typing-man:sessions')||'[]');if(s.length&&s[0].name){var n=s[0].name,el=document.getElementById('user-nav');if(el)el.innerHTML='<a href="/user/'+encodeURIComponent(n)+'">&#128100; '+n.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</a>';}}catch(e){}})()`}} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{
+  var s=JSON.parse(localStorage.getItem('typing-man:sessions')||'[]');
+  if(s.length===0&&!document.cookie.match(/(^|;\\s*)name=/)){
+    var p=location.pathname;
+    if(!p.startsWith('/tutorial')){location.replace('/tutorial');return;}
+  }
+  if(s.length&&s[0].name){
+    var n=s[0].name,el=document.getElementById('user-nav');
+    if(el)el.innerHTML='<a href="/user/'+encodeURIComponent(n)+'">&#128100; '+n.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</a>';
+  }
+}catch(e){}})()`}} />
       </body>
     </html>
   );
