@@ -24,7 +24,7 @@ const ManLineEl: FC<{ line: ManLine }> = ({ line }) => {
         </dd>
       );
     case 'dd-blank':
-      return <dd class="blank"></dd>;
+      return <dd class="blank"><span class="enter"> </span></dd>;
   }
 };
 
