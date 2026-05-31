@@ -23,6 +23,8 @@ const ManLineEl: FC<{ line: ManLine }> = ({ line }) => {
           <span class="skip"> </span>
         </dd>
       );
+    case 'dd-blank':
+      return <dd class="blank"></dd>;
   }
 };
 
@@ -107,8 +109,6 @@ export const ManPage: FC<ManPageProps> = ({ entry, ranks }) => {
           ))}
         </ol>
       </div>
-
-      <canvas id="cpm-graph" width="900" height="160" />
 
       <div id="drop" />
       <div id="miss" />

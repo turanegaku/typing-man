@@ -261,3 +261,7 @@ header h1 a {
 #rank ol li.my .name span:nth-child(13) {
   visibility: hidden;
 }
+
+dd.blank {
+  min-height: 1.4em;
+}

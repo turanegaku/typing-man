@@ -3,7 +3,8 @@ export type ManLine =
   | { kind: 'dt'; text: string }        // セクションヘッダ <dt>
   | { kind: 'dd'; text: string }        // 段落 <dd>
   | { kind: 'dd-tab'; text: string }    // インデント段落 <dd class="tab">
-  | { kind: 'dd-skip' };               // スキップ行 <dd><span class="skip"> </span></dd>
+  | { kind: 'dd-skip' }                 // スキップ行 <dd><span class="skip"> </span></dd>
+  | { kind: 'dd-blank' };               // 空行（入力不要） <dd class="blank"></dd>
 
 /** お題エントリ */
 export type ManEntry = {
