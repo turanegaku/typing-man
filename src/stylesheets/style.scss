@@ -650,6 +650,15 @@ dd.blank {
   font-size: 0.9em;
 }
 
+.sr-wk-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0;
+
+  .sr-wk-track { flex: 1; }
+}
+
 .sr-wk-key {
   display: inline-block;
   min-width: 26px;
