@@ -1,6 +1,7 @@
 body {
   padding: 10px;
-  font: 14px Inconsolata, "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-family: 'JetBrains Mono', Inconsolata, monospace;
 }
 
 .container {
