@@ -54,6 +54,7 @@ $(() => {
     const appeal = $('<div>', { class: 'ring' });
 
     let keyStats, typedCount, questionActiveTime;
+    let currentCharMissed = false; // 文字ごとのミスフラグ（keyStats用）
     let finalCpm = 0, finalAccuracy = 100;
 
     // ghost
@@ -66,6 +67,7 @@ $(() => {
         step          = CLEAN;
         keyStats      = {};
         typedCount    = 0;
+        currentCharMissed = false;
         finalCpm      = 0;
         finalAccuracy = 100;
 
@@ -285,11 +287,15 @@ $(() => {
         if (!question.hasClass('skip') && !question.hasClass('enter')) {
             const reaction = questionActiveTime ? Math.round(moment() - questionActiveTime) : 0;
             const ch = question.text();
-            if (!keyStats[ch]) keyStats[ch] = { times: [], misses: 0 };
+            if (!keyStats[ch]) keyStats[ch] = { times: [], misses: 0, hits: 0 };
             keyStats[ch].times.push(reaction);
             if (keyStats[ch].times.length > 5) keyStats[ch].times.shift();
+            // ミスフラグが立っていれば1ミスとしてカウント（連打しても1回）
+            if (currentCharMissed) keyStats[ch].misses++;
+            keyStats[ch].hits++;
             typedCount++;
         }
+        currentCharMissed = false; // 次の文字へ進む前にリセット
 
         question.attr('time', elapsed).addClass('done').removeClass('now ghost-now');
 
@@ -382,12 +388,9 @@ $(() => {
                 if (question.text() === String.fromCharCode(e.which)) {
                     if (!miss.children().length && question.next().length) nextChar();
                 } else {
-                    error.text(+error.text() + 1);
+                    error.text(+error.text() + 1);  // Acc用ミスは従来通り複数カウント
                     question.addClass('miss');
-
-                    const ch = question.text();
-                    if (!keyStats[ch]) keyStats[ch] = { times: [], misses: 0 };
-                    keyStats[ch].misses++;
+                    currentCharMissed = true;        // keyStats用フラグ（1文字1ミスまで）
 
                     const pos = question.position();
                     miss.css({ left: pos.left, top: pos.top })

@@ -57,7 +57,8 @@ $(() => {
         Object.entries(s.keyStats).forEach(([ch, stat]) => {
             if (!keyAgg[ch]) keyAgg[ch] = { misses: 0, hits: 0, times: [] };
             keyAgg[ch].misses += stat.misses || 0;
-            keyAgg[ch].hits   += (stat.times || []).length;
+            // 新形式: stat.hits / 旧形式フォールバック: times.length
+            keyAgg[ch].hits   += stat.hits != null ? stat.hits : (stat.times || []).length;
             if (stat.times) keyAgg[ch].times.push(...stat.times);
         });
     });
