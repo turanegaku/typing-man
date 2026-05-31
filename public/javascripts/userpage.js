@@ -106,20 +106,23 @@ $(() => {
         return { ch, misses: agg.misses, hits: agg.hits, missRate, avgTime };
     });
     const WEAK_N = 5;
+    const GOOD_N = 3;
     const weakByMiss = keyList.filter(k => k.misses > 0).sort((a, b) => b.missRate - a.missRate).slice(0, WEAK_N);
     const weakByTime = keyList.filter(k => k.avgTime > 0).sort((a, b) => b.avgTime - a.avgTime).slice(0, WEAK_N);
     const maxMissRate = weakByMiss.length ? weakByMiss[0].missRate : 1;
     const maxAvgTime  = weakByTime.length ? weakByTime[0].avgTime  : 1;
-    // 得意なキー（ミス率が低くかつ反応が速いキー TOP 3）
-    const maxAllAvgTime = keyList.length ? Math.max(...keyList.map(k => k.avgTime)) || 1 : 1;
-    const goodKeys = keyList
-        .filter(k => (k.misses + k.hits) >= 3)
-        .map(k => ({
-            ...k,
-            goodScore: (1 - k.missRate) * 0.5 + (maxAllAvgTime > 0 ? (1 - k.avgTime / maxAllAvgTime) : 0) * 0.5,
-        }))
-        .sort((a, b) => b.goodScore - a.goodScore)
-        .slice(0, 3);
+
+    // 得意なキー（3回以上打鍵したキーから独立集計）
+    const goodByMiss = keyList
+        .filter(k => (k.misses + k.hits) >= 3 && k.missRate < 0.5)
+        .sort((a, b) => a.missRate - b.missRate)
+        .slice(0, GOOD_N);
+    const goodByTime = keyList
+        .filter(k => k.avgTime > 0 && (k.misses + k.hits) >= 3)
+        .sort((a, b) => a.avgTime - b.avgTime)
+        .slice(0, GOOD_N);
+    const maxGoodAcc  = goodByMiss.length ? 1 - goodByMiss[0].missRate : 1;
+    const minGoodTime = goodByTime.length ? goodByTime[0].avgTime : 1;
 
     // レーダー値
     const speedVal = Math.min(100, Math.round(cumCpm / 4));
@@ -373,14 +376,42 @@ $(() => {
         </div>
       </div>
       <h3 class="sr-sec" style="margin-top:16px">得意なキー</h3>
-      <div class="sr-good-keys">
-        ${goodKeys.length === 0
-          ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし（各キー3回以上必要）</p>`
-          : goodKeys.map((k, i) => {
-              const medalArr = ['🥇', '🥈', '🥉'];
-              return `<span class="sr-good-key">${medalArr[i]} <kbd class="sr-wk-key sr-wk-key--good">${esc(k.ch)}</kbd> ミス率${(k.missRate*100).toFixed(0)}%・${k.avgTime}ms</span>`;
-            }).join('')
-        }
+      <div class="sr-weak-cols">
+        <!-- ミス率が低いキー -->
+        <div class="sr-weak-col">
+          <div class="sr-weak-col-head sr-weak-col-head--good-miss">ミス率が低い</div>
+          ${goodByMiss.length === 0
+            ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし（3回以上必要）</p>`
+            : goodByMiss.map((k, i) => {
+                const acc = 1 - k.missRate;
+                const pct = Math.max(6, Math.round(acc / maxGoodAcc * 100));
+                return `<div class="sr-wk-row">
+                  <span class="sr-wk-rank">${i + 1}</span>
+                  <kbd class="sr-wk-key sr-wk-key--good">${esc(k.ch)}</kbd>
+                  <div class="sr-wk-track">
+                    <div class="sr-wk-fill sr-wk-fill--good-miss" style="width:${pct}%">${(acc * 100).toFixed(0)}%</div>
+                  </div>
+                </div>`;
+              }).join('')
+          }
+        </div>
+        <!-- 反応が速いキー -->
+        <div class="sr-weak-col">
+          <div class="sr-weak-col-head sr-weak-col-head--good-time">反応が速い</div>
+          ${goodByTime.length === 0
+            ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし（3回以上必要）</p>`
+            : goodByTime.map((k, i) => {
+                const pct = Math.max(6, Math.round(minGoodTime / k.avgTime * 100));
+                return `<div class="sr-wk-row">
+                  <span class="sr-wk-rank">${i + 1}</span>
+                  <kbd class="sr-wk-key sr-wk-key--good">${esc(k.ch)}</kbd>
+                  <div class="sr-wk-track">
+                    <div class="sr-wk-fill sr-wk-fill--good-time" style="width:${pct}%">${k.avgTime}ms</div>
+                  </div>
+                </div>`;
+              }).join('')
+          }
+        </div>
       </div>
     </div>
 
@@ -488,11 +519,11 @@ $(() => {
             return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#ccc" stroke-width="1"/>`;
         }).join('');
 
-        // ラベルは固定位置（切れない位置に配置）
+        // ラベルは固定位置（切れない位置に配置）、title要素でツールチップ説明
         const labelSvg = [
-            `<text x="${cx}"   y="16"       text-anchor="middle" font-size="11" fill="#555">速度 ${speed}</text>`,
-            `<text x="${W-8}"  y="${H-8}"   text-anchor="end"    font-size="11" fill="#555">正確性 ${acc}</text>`,
-            `<text x="8"       y="${H-8}"   text-anchor="start"  font-size="11" fill="#555">流暢さ ${flu}</text>`,
+            `<text x="${cx}"   y="16"       text-anchor="middle" font-size="11" fill="#555" style="cursor:default"><title>CPM（1分間あたりの打鍵数）で評価。400 CPM で満点。</title>速度 ${speed}</text>`,
+            `<text x="${W-8}"  y="${H-8}"   text-anchor="end"    font-size="11" fill="#555" style="cursor:default"><title>Acc（入力正解率）で評価。ミス回数が少ないほど高スコア。</title>正確性 ${acc}</text>`,
+            `<text x="8"       y="${H-8}"   text-anchor="start"  font-size="11" fill="#555" style="cursor:default"><title>打鍵リズムのばらつきの少なさで評価。安定して打てているほど高スコア。</title>流暢さ ${flu}</text>`,
         ].join('');
 
         return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="sr-radar">
@@ -682,13 +713,15 @@ $(() => {
 }
 .sr-wk-key--miss { background: #fff3e0; border: 1px solid #ffb74d; color: #e65100; }
 .sr-wk-key--time { background: #fff8e1; border: 1px solid #ffd54f; color: #f57f17; }
-.sr-good-keys { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-.sr-good-key  { font-size: .82em; color: #444; display: flex; align-items: center; gap: 4px; }
 .sr-wk-key--good { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; }
+.sr-weak-col-head--good-miss { background: #e8f5e9; color: #2e7d32; border-bottom: 2px solid #a5d6a7; }
+.sr-weak-col-head--good-time { background: #e3f2fd; color: #1565c0; border-bottom: 2px solid #90caf9; }
 .sr-wk-track { flex: 1; background: #f0f0f0; border-radius: 3px; overflow: hidden; height: 16px; min-width: 0; }
 .sr-wk-fill  { height: 16px; line-height: 16px; font-size: .72em; padding-left: 4px; white-space: nowrap; border-radius: 3px; }
-.sr-wk-fill--miss { background: linear-gradient(90deg, #ff8f00, #ffb300); color: #fff; }
-.sr-wk-fill--time { background: linear-gradient(90deg, #ffc107, #ffe082); color: #5d4037; }
+.sr-wk-fill--miss      { background: linear-gradient(90deg, #ff8f00, #ffb300); color: #fff; }
+.sr-wk-fill--time      { background: linear-gradient(90deg, #ffc107, #ffe082); color: #5d4037; }
+.sr-wk-fill--good-miss { background: linear-gradient(90deg, #2e7d32, #66bb6a); color: #fff; }
+.sr-wk-fill--good-time { background: linear-gradient(90deg, #1565c0, #42a5f5); color: #fff; }
 
 /* ── 詳細テーブル ── */
 .sr-table { width: 100%; border-collapse: collapse; font-size: .88em; }
