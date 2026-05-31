@@ -101,21 +101,20 @@ $(() => {
         const total    = agg.misses + agg.hits;
         const missRate = total > 0 ? agg.misses / total : 0;
         const avgTime  = agg.times.length ? Math.round(agg.times.reduce((a, b) => a + b, 0) / agg.times.length) : 0;
-        return { ch, misses: agg.misses, hits: agg.hits, missRate, avgTime };
+        return { ch, misses: agg.misses, hits: agg.hits, total, missRate, avgTime };
     });
-    const WEAK_N = 3;
-    const GOOD_N = 3;
-    const timedKeys = keyList.filter(k => k.avgTime > 0);
-    const weakByMiss = keyList.filter(k => k.misses > 0).sort((a, b) => b.missRate - a.missRate).slice(0, WEAK_N);
-    const weakByTime = timedKeys.slice().sort((a, b) => b.avgTime - a.avgTime).slice(0, WEAK_N);
-    const maxMissRate = weakByMiss.length ? weakByMiss[0].missRate : 1;
-    const maxAvgTime  = timedKeys.length ? Math.max(...timedKeys.map(k => k.avgTime)) : 1;
+    const timedKeys    = keyList.filter(k => k.avgTime > 0);
+    // Sort once per axis for absolute color position mapping
+    const sortedByMiss = keyList.slice().sort((a, b) => (b.missRate - a.missRate) || (a.total - b.total));
+    const sortedByTime = timedKeys.slice().sort((a, b) => b.avgTime - a.avgTime);
+    const maxMissRate  = sortedByMiss.length ? sortedByMiss[0].missRate : 1;
+    const maxAvgTime   = sortedByTime.length ? sortedByTime[0].avgTime  : 1;
+    // t=0 → worst (orange/yellow), t=1 → best (blue/cyan)
+    const missColorT   = new Map(sortedByMiss.map((k, i) => [k.ch, i / Math.max(sortedByMiss.length - 1, 1)]));
+    const timeColorT   = new Map(sortedByTime.map((k, i) => [k.ch, i / Math.max(sortedByTime.length - 1, 1)]));
 
-    // 得意なキー（3回以上打鍵したキーから独立集計）
-    const goodByTime = timedKeys
-        .filter(k => (k.misses + k.hits) >= 3)
-        .sort((a, b) => a.avgTime - b.avgTime)
-        .slice(0, GOOD_N);
+    // キー傾向ソート状態
+    let keyTrendSort = { col: 'miss', asc: false };
 
     // レーダー値
     const speedVal = Math.min(100, Math.round(cumCpm / 4));
@@ -153,6 +152,14 @@ $(() => {
         }));
         history.replaceState(null, '', location.pathname);
     }
+
+    // キー傾向ソート
+    container.on('click', '.sr-kt-th-sort', function() {
+        const col = $(this).data('col');
+        if (keyTrendSort.col === col) { keyTrendSort.asc = !keyTrendSort.asc; }
+        else { keyTrendSort.col = col; keyTrendSort.asc = false; }
+        $('#sr-key-trend').html(buildKeyTrend());
+    });
 
     $(document).on('click', '#sr-username-display', function() {
         const display = $(this);
@@ -274,6 +281,80 @@ $(() => {
         });
     }
 
+    // ── キー傾向テーブル ──────────────────────────────────────────
+    function missBarColor(t) {
+        // worst: rgb(255,143,0) → best: rgb(0,143,255)
+        return `rgb(${Math.round(255*(1-t))},143,${Math.round(255*t)})`;
+    }
+    function timeBarColor(t) {
+        // worst: rgb(255,193,7) → best: rgb(7,193,255)
+        return `rgb(${Math.round(255-248*t)},193,${Math.round(7+248*t)})`;
+    }
+    function buildKeyTrend() {
+        const TOP_N = 5, BOT_N = 3;
+        const base   = keyTrendSort.col === 'time' ? timedKeys : keyList;
+        const sorted = base.slice().sort((a, b) => {
+            const cmp = keyTrendSort.col === 'miss'
+                ? (b.missRate - a.missRate) || (a.total - b.total)
+                : (b.avgTime   - a.avgTime);
+            return keyTrendSort.asc ? -cmp : cmp;
+        });
+
+        if (sorted.length === 0) return '<p class="sr-muted" style="font-size:.82em">データなし</p>';
+
+        let top, bottom, hasGap;
+        if (sorted.length <= TOP_N + BOT_N) {
+            top = sorted; bottom = []; hasGap = false;
+        } else {
+            top = sorted.slice(0, TOP_N); bottom = sorted.slice(-BOT_N); hasGap = true;
+        }
+
+        function rowHTML(k) {
+            const mT  = missColorT.has(k.ch) ? missColorT.get(k.ch) : 0;
+            const missPct = Math.max(4, Math.round(k.missRate / maxMissRate * 100));
+            const missStr = (k.missRate * 100).toFixed(0) + '%';
+            const missBg  = missBarColor(mT);
+
+            let timeTd;
+            if (k.avgTime > 0) {
+                const tT = timeColorT.has(k.ch) ? timeColorT.get(k.ch) : 0;
+                const timePct = Math.max(4, Math.round(k.avgTime / maxAvgTime * 100));
+                timeTd = `<div class="sr-wk-track"><div class="sr-wk-fill" style="width:${timePct}%;background:${timeBarColor(tT)}">${k.avgTime}ms</div></div>`;
+            } else {
+                timeTd = `<span class="sr-kt-na">—</span>`;
+            }
+
+            return `<tr class="sr-kt-row">
+              <td class="sr-kt-key-cell"><kbd class="sr-wk-key">${esc(k.ch)}</kbd></td>
+              <td class="sr-kt-bar-cell"><div class="sr-wk-track"><div class="sr-wk-fill" style="width:${missPct}%;background:${missBg}">${missStr}</div></div></td>
+              <td class="sr-kt-bar-cell">${timeTd}</td>
+            </tr>`;
+        }
+
+        const missIcon = `<span class="sr-kt-icon">${keyTrendSort.col==='miss' ? (keyTrendSort.asc?'▲':'▼') : '⇅'}</span>`;
+        const timeIcon = `<span class="sr-kt-icon">${keyTrendSort.col==='time' ? (keyTrendSort.asc?'▲':'▼') : '⇅'}</span>`;
+
+        let rows = '';
+        if (hasGap) {
+            rows += `<tr class="sr-kt-label-row"><td colspan="3">上位${TOP_N}つ</td></tr>`;
+            top.forEach(k => { rows += rowHTML(k); });
+            rows += `<tr class="sr-kt-sep-row"><td colspan="3">…</td></tr>`;
+            rows += `<tr class="sr-kt-label-row"><td colspan="3">下位${BOT_N}つ</td></tr>`;
+            bottom.forEach(k => { rows += rowHTML(k); });
+        } else {
+            sorted.forEach(k => { rows += rowHTML(k); });
+        }
+
+        return `<table class="sr-kt-table">
+          <thead><tr>
+            <th class="sr-kt-th sr-kt-th-key">キー</th>
+            <th class="sr-kt-th sr-kt-th-sort" data-col="miss">ミス率${missIcon}</th>
+            <th class="sr-kt-th sr-kt-th-sort" data-col="time">反応速度${timeIcon}</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
     // ── HTML構築 ──────────────────────────────────────────────────
     function buildHTML() {
         return `
@@ -329,65 +410,9 @@ $(() => {
         }).join('')}
       </div>
 
-      <!-- キー傾向：二軸別リスト -->
+      <!-- キー傾向 -->
       <h3 class="sr-sec" style="margin-top:28px">キー傾向</h3>
-      <div class="sr-weak-cols">
-        <!-- ミスが多いキー -->
-        <div class="sr-weak-col">
-          <div class="sr-weak-col-head sr-weak-col-head--miss">ミス率が高い</div>
-          ${weakByMiss.length === 0
-            ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし</p>`
-            : weakByMiss.map((k, i) => {
-                const pct      = Math.max(6, Math.round(k.missRate / maxMissRate * 100));
-                const rateStr  = (k.missRate * 100).toFixed(0) + '%';
-                return `<div class="sr-wk-row">
-                  <span class="sr-wk-rank">${i + 1}</span>
-                  <kbd class="sr-wk-key sr-wk-key--miss">${esc(k.ch)}</kbd>
-                  <div class="sr-wk-track">
-                    <div class="sr-wk-fill sr-wk-fill--miss" style="width:${pct}%">${rateStr}</div>
-                  </div>
-                </div>`;
-              }).join('')
-          }
-        </div>
-        <!-- 反応が遅いキー -->
-        <div class="sr-weak-col">
-          <div class="sr-weak-col-head sr-weak-col-head--time">反応が遅い</div>
-          ${weakByTime.length === 0
-            ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし</p>`
-            : weakByTime.map((k, i) => {
-                const pct = Math.max(6, Math.round(k.avgTime / maxAvgTime * 100));
-                return `<div class="sr-wk-row">
-                  <span class="sr-wk-rank">${i + 1}</span>
-                  <kbd class="sr-wk-key sr-wk-key--time">${esc(k.ch)}</kbd>
-                  <div class="sr-wk-track">
-                    <div class="sr-wk-fill sr-wk-fill--time" style="width:${pct}%">${k.avgTime}ms</div>
-                  </div>
-                </div>`;
-              }).join('')
-          }
-        </div>
-      </div>
-      <h3 class="sr-sec" style="margin-top:16px">得意なキー</h3>
-      <div class="sr-weak-cols">
-        <!-- 反応が速いキー -->
-        <div class="sr-weak-col">
-          <div class="sr-weak-col-head sr-weak-col-head--good-time">反応が速い</div>
-          ${goodByTime.length === 0
-            ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし（3回以上必要）</p>`
-            : goodByTime.map((k, i) => {
-                const pct = Math.max(6, Math.round(k.avgTime / maxAvgTime * 100));
-                return `<div class="sr-wk-row">
-                  <span class="sr-wk-rank">${i + 1}</span>
-                  <kbd class="sr-wk-key sr-wk-key--good">${esc(k.ch)}</kbd>
-                  <div class="sr-wk-track">
-                    <div class="sr-wk-fill sr-wk-fill--good-time" style="width:${pct}%">${k.avgTime}ms</div>
-                  </div>
-                </div>`;
-              }).join('')
-          }
-        </div>
-      </div>
+      <div id="sr-key-trend">${buildKeyTrend()}</div>
     </div>
 
     <!-- 右 -->
