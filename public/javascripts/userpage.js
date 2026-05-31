@@ -47,7 +47,7 @@ $(() => {
     mine.forEach(s => { if (s.man) byMan[s.man] = (byMan[s.man] || 0) + 1; });
     const manEntries = Object.entries(byMan)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 15);
+        .slice(0, 10);
     const maxCount = Math.max(1, ...manEntries.map(([, c]) => c));
 
     // 苦手キー集計（ミス割合・平均反応時間を独立して集計）
@@ -75,7 +75,7 @@ $(() => {
     const maxAvgTime  = weakByTime.length ? weakByTime[0].avgTime  : 1;
 
     // レーダー値
-    const speedVal = Math.min(100, Math.round(cumCpm / 6));
+    const speedVal = Math.min(100, Math.round(cumCpm / 4));
     const accVal   = Math.round(cumAccNum);
     const allTimes = [];
     mine.forEach(s => {
@@ -329,7 +329,7 @@ $(() => {
         }
 
         // 初Acc 100%
-        const firstPerfect = mine.slice().reverse().find(s => (s.accuracy || 0) >= 100);
+        const firstPerfect = mine.slice().reverse().find(s => (s.accuracy || 0) >= 100 && s.man !== 'a');
         if (firstPerfect) {
             rows.push(`🎯 初 Acc 100%：<strong>${esc(firstPerfect.man)}</strong> <span class="sr-date">${fmtDate(firstPerfect.date)}</span>`);
         } else {

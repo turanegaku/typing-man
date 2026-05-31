@@ -200,9 +200,7 @@ $(() => {
         if (my.hasClass('out')) {
             my.insertAfter(rank.find('ol > li').last()).hide().show(500);
         }
-        if (rank.offset().top + rank.height() > $(window).height()) {
-            $('body,html').animate({ scrollTop: rank.offset().top }, 800, 'swing');
-        }
+        $('body,html').animate({ scrollTop: rank.offset().top }, 800, 'swing');
     }
 
     function _newRecord(result, my) {
@@ -408,9 +406,9 @@ $(() => {
     });
 
     // ── buttons ────────────────────────────────────────────────
+    $('#option button').on('mousedown', e => { e.preventDefault(); });
     $('#option button#restart').click(() => {
         initialize();
-        question.focus();
     });
 
     $('#option button#review').click(() => {
