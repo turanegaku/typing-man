@@ -23,6 +23,7 @@ export const Layout: FC<LayoutProps & { children?: any }> = ({
           </h1>
           <nav id="user-nav" />
         </header>
+        <hr />
 
         <div class="container">
           {children}
