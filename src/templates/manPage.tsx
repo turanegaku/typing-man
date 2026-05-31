@@ -1,5 +1,6 @@
 import type { FC } from 'hono/jsx';
 import { Layout } from './layout.js';
+import { InfoSection } from './infoSection.js';
 import type { ManEntry, ManLine, RankRecord } from '../data/mans/types.js';
 
 const RANK_MAX = 10;
@@ -56,7 +57,7 @@ export const ManPage: FC<ManPageProps> = ({ entry, ranks, tutorial }) => {
         </>
       }
     >
-      <div id="info">
+      <InfoSection>
         <div id="error" class="inline-3">
           <dl>
             <dt><h3>ERROR</h3></dt>
@@ -86,8 +87,7 @@ export const ManPage: FC<ManPageProps> = ({ entry, ranks, tutorial }) => {
           <p><span class="delete">Delete(BS)</span></p>
         </div>
         <p class="inline-3">キー入力と同時にスタートします</p>
-      </div>
-      <hr />
+      </InfoSection>
 
       <div id="question" data-command={entry.command} data-tutorial={tutorial ? 'true' : undefined}>
         <dl>
