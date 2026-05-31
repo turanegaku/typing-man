@@ -23,7 +23,7 @@ $(() => {
     }
 
     // ── prepare text ───────────────────────────────────────────
-    $('#question :not(:has(p))').contents()
+    $('#question :not(:has(p)):not(.enter)').contents()
     .filter((_, t) => t.nodeType === 3)
     .each((_, txt) => {
         $(txt).replaceWith(
