@@ -105,24 +105,19 @@ $(() => {
         const avgTime  = agg.times.length ? Math.round(agg.times.reduce((a, b) => a + b, 0) / agg.times.length) : 0;
         return { ch, misses: agg.misses, hits: agg.hits, missRate, avgTime };
     });
-    const WEAK_N = 5;
+    const WEAK_N = 3;
     const GOOD_N = 3;
+    const timedKeys = keyList.filter(k => k.avgTime > 0);
     const weakByMiss = keyList.filter(k => k.misses > 0).sort((a, b) => b.missRate - a.missRate).slice(0, WEAK_N);
-    const weakByTime = keyList.filter(k => k.avgTime > 0).sort((a, b) => b.avgTime - a.avgTime).slice(0, WEAK_N);
+    const weakByTime = timedKeys.slice().sort((a, b) => b.avgTime - a.avgTime).slice(0, WEAK_N);
     const maxMissRate = weakByMiss.length ? weakByMiss[0].missRate : 1;
-    const maxAvgTime  = weakByTime.length ? weakByTime[0].avgTime  : 1;
+    const maxAvgTime  = timedKeys.length ? Math.max(...timedKeys.map(k => k.avgTime)) : 1;
 
     // 得意なキー（3回以上打鍵したキーから独立集計）
-    const goodByMiss = keyList
-        .filter(k => (k.misses + k.hits) >= 3 && k.missRate < 0.5)
-        .sort((a, b) => a.missRate - b.missRate)
-        .slice(0, GOOD_N);
-    const goodByTime = keyList
-        .filter(k => k.avgTime > 0 && (k.misses + k.hits) >= 3)
+    const goodByTime = timedKeys
+        .filter(k => (k.misses + k.hits) >= 3)
         .sort((a, b) => a.avgTime - b.avgTime)
         .slice(0, GOOD_N);
-    const maxGoodAcc  = goodByMiss.length ? 1 - goodByMiss[0].missRate : 1;
-    const minGoodTime = goodByTime.length ? goodByTime[0].avgTime : 1;
 
     // レーダー値
     const speedVal = Math.min(100, Math.round(cumCpm / 4));
@@ -377,31 +372,13 @@ $(() => {
       </div>
       <h3 class="sr-sec" style="margin-top:16px">得意なキー</h3>
       <div class="sr-weak-cols">
-        <!-- ミス率が低いキー -->
-        <div class="sr-weak-col">
-          <div class="sr-weak-col-head sr-weak-col-head--good-miss">ミス率が低い</div>
-          ${goodByMiss.length === 0
-            ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし（3回以上必要）</p>`
-            : goodByMiss.map((k, i) => {
-                const acc = 1 - k.missRate;
-                const pct = Math.max(6, Math.round(acc / maxGoodAcc * 100));
-                return `<div class="sr-wk-row">
-                  <span class="sr-wk-rank">${i + 1}</span>
-                  <kbd class="sr-wk-key sr-wk-key--good">${esc(k.ch)}</kbd>
-                  <div class="sr-wk-track">
-                    <div class="sr-wk-fill sr-wk-fill--good-miss" style="width:${pct}%">${(acc * 100).toFixed(0)}%</div>
-                  </div>
-                </div>`;
-              }).join('')
-          }
-        </div>
         <!-- 反応が速いキー -->
         <div class="sr-weak-col">
           <div class="sr-weak-col-head sr-weak-col-head--good-time">反応が速い</div>
           ${goodByTime.length === 0
             ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし（3回以上必要）</p>`
             : goodByTime.map((k, i) => {
-                const pct = Math.max(6, Math.round(minGoodTime / k.avgTime * 100));
+                const pct = Math.max(6, Math.round(k.avgTime / maxAvgTime * 100));
                 return `<div class="sr-wk-row">
                   <span class="sr-wk-rank">${i + 1}</span>
                   <kbd class="sr-wk-key sr-wk-key--good">${esc(k.ch)}</kbd>
@@ -650,8 +627,8 @@ $(() => {
     border-radius: 0 0 8px 8px;
     overflow: hidden;
 }
-.sr-left  { flex: 1.1; padding: 20px 20px; border-right: 1px solid #ffd0a0; }
-.sr-right { flex: 1;   padding: 20px 20px; display: flex; flex-direction: column; gap: 18px; }
+.sr-left  { flex: 1; padding: 20px 20px; border-right: 1px solid #ffd0a0; }
+.sr-right { flex: 1; padding: 20px 20px; display: flex; flex-direction: column; gap: 18px; }
 
 .sr-sec {
     font-size: .95em;
