@@ -542,71 +542,49 @@ dd.blank {
   margin-left: 4px;
 }
 
-.sr-kt-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85em;
-  table-layout: fixed;
+.sr-kt-cols {
+  display: flex;
+  gap: 12px;
 }
 
-.sr-kt-th {
-  padding: 4px 6px;
-  text-align: left;
+.sr-kt-col {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85em;
+}
+
+.sr-kt-col-head {
+  font-size: 0.82em;
   font-weight: bold;
-  font-size: 0.8em;
+  padding: 3px 6px;
+  margin-bottom: 4px;
   border-bottom: 2px solid #e0e0e0;
-  white-space: nowrap;
-}
-.sr-kt-th-key {
-  width: 42px;
-}
-.sr-kt-th-sort {
   cursor: pointer;
   user-select: none;
 }
-.sr-kt-th-sort:hover {
+.sr-kt-col-head:hover {
   background: #f5f5f5;
 }
 
 .sr-kt-icon {
-  font-size: 0.82em;
-  margin-left: 2px;
+  font-size: 0.85em;
+  margin-left: 3px;
   opacity: 0.75;
 }
 
-.sr-kt-row td {
-  padding: 2px 4px;
-  vertical-align: middle;
-}
-
-.sr-kt-key-cell {
-  width: 42px;
-  text-align: center;
-}
-
-.sr-kt-bar-cell {
-  padding: 2px 4px;
-}
-
-.sr-kt-label-row td {
+.sr-kt-label {
   font-size: 0.72em;
   color: #bbb;
-  padding: 5px 4px 2px;
+  padding: 4px 0 2px;
   font-weight: bold;
   letter-spacing: 0.03em;
 }
 
-.sr-kt-sep-row td {
+.sr-kt-sep {
   text-align: center;
   color: #bbb;
-  padding: 1px;
+  padding: 2px 0;
   font-size: 0.9em;
-}
-
-.sr-kt-na {
-  color: #bbb;
-  font-size: 0.75em;
-  padding: 0 4px;
 }
 
 .sr-wk-key {

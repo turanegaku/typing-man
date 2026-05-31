@@ -113,8 +113,9 @@ $(() => {
     const missColorT   = new Map(sortedByMiss.map((k, i) => [k.ch, i / Math.max(sortedByMiss.length - 1, 1)]));
     const timeColorT   = new Map(sortedByTime.map((k, i) => [k.ch, i / Math.max(sortedByTime.length - 1, 1)]));
 
-    // キー傾向ソート状態
-    let keyTrendSort = { col: 'miss', asc: false };
+    // キー傾向ソート状態（各軸独立）
+    let keyTrendMissAsc = false;
+    let keyTrendTimeAsc = false;
 
     // レーダー値
     const speedVal = Math.min(100, Math.round(cumCpm / 4));
@@ -155,9 +156,9 @@ $(() => {
 
     // キー傾向ソート
     container.on('click', '.sr-kt-th-sort', function() {
-        const col = $(this).data('col');
-        if (keyTrendSort.col === col) { keyTrendSort.asc = !keyTrendSort.asc; }
-        else { keyTrendSort.col = col; keyTrendSort.asc = false; }
+        const axis = $(this).data('axis');
+        if (axis === 'miss') { keyTrendMissAsc = !keyTrendMissAsc; }
+        else                 { keyTrendTimeAsc = !keyTrendTimeAsc; }
         $('#sr-key-trend').html(buildKeyTrend());
     });
 
@@ -292,67 +293,70 @@ $(() => {
     }
     function buildKeyTrend() {
         const TOP_N = 5, BOT_N = 3;
-        const base   = keyTrendSort.col === 'time' ? timedKeys : keyList;
-        const sorted = base.slice().sort((a, b) => {
-            const cmp = keyTrendSort.col === 'miss'
-                ? (b.missRate - a.missRate) || (a.total - b.total)
-                : (b.avgTime   - a.avgTime);
-            return keyTrendSort.asc ? -cmp : cmp;
-        });
 
-        if (sorted.length === 0) return '<p class="sr-muted" style="font-size:.82em">データなし</p>';
+        function makeCol(base, axis, sortAsc) {
+            const sorted = base.slice().sort((a, b) => {
+                const cmp = axis === 'miss'
+                    ? (b.missRate - a.missRate) || (a.total - b.total)
+                    : (b.avgTime - a.avgTime);
+                return sortAsc ? -cmp : cmp;
+            });
 
-        let top, bottom, hasGap;
-        if (sorted.length <= TOP_N + BOT_N) {
-            top = sorted; bottom = []; hasGap = false;
-        } else {
-            top = sorted.slice(0, TOP_N); bottom = sorted.slice(-BOT_N); hasGap = true;
-        }
-
-        function rowHTML(k) {
-            const mT  = missColorT.has(k.ch) ? missColorT.get(k.ch) : 0;
-            const missPct = Math.max(4, Math.round(k.missRate / maxMissRate * 100));
-            const missStr = (k.missRate * 100).toFixed(0) + '%';
-            const missBg  = missBarColor(mT);
-
-            let timeTd;
-            if (k.avgTime > 0) {
-                const tT = timeColorT.has(k.ch) ? timeColorT.get(k.ch) : 0;
-                const timePct = Math.max(4, Math.round(k.avgTime / maxAvgTime * 100));
-                timeTd = `<div class="sr-wk-track"><div class="sr-wk-fill" style="width:${timePct}%;background:${timeBarColor(tT)}">${k.avgTime}ms</div></div>`;
-            } else {
-                timeTd = `<span class="sr-kt-na">—</span>`;
+            if (sorted.length === 0) {
+                return '<p class="sr-muted" style="font-size:.82em">データなし</p>';
             }
 
-            return `<tr class="sr-kt-row">
-              <td class="sr-kt-key-cell"><kbd class="sr-wk-key">${esc(k.ch)}</kbd></td>
-              <td class="sr-kt-bar-cell"><div class="sr-wk-track"><div class="sr-wk-fill" style="width:${missPct}%;background:${missBg}">${missStr}</div></div></td>
-              <td class="sr-kt-bar-cell">${timeTd}</td>
-            </tr>`;
+            let top, bottom, hasGap;
+            if (sorted.length <= TOP_N + BOT_N) {
+                top = sorted; bottom = []; hasGap = false;
+            } else {
+                top = sorted.slice(0, TOP_N); bottom = sorted.slice(-BOT_N); hasGap = true;
+            }
+
+            function rowHTML(k) {
+                if (axis === 'miss') {
+                    const mT     = missColorT.has(k.ch) ? missColorT.get(k.ch) : 0;
+                    const pct    = Math.max(4, Math.round(k.missRate / maxMissRate * 100));
+                    return `<div class="sr-wk-row">
+                      <kbd class="sr-wk-key">${esc(k.ch)}</kbd>
+                      <div class="sr-wk-track"><div class="sr-wk-fill" style="width:${pct}%;background:${missBarColor(mT)}">${(k.missRate*100).toFixed(0)}%</div></div>
+                    </div>`;
+                } else {
+                    const tT     = timeColorT.has(k.ch) ? timeColorT.get(k.ch) : 0;
+                    const pct    = Math.max(4, Math.round(k.avgTime / maxAvgTime * 100));
+                    return `<div class="sr-wk-row">
+                      <kbd class="sr-wk-key">${esc(k.ch)}</kbd>
+                      <div class="sr-wk-track"><div class="sr-wk-fill" style="width:${pct}%;background:${timeBarColor(tT)}">${k.avgTime}ms</div></div>
+                    </div>`;
+                }
+            }
+
+            let html = '';
+            if (hasGap) {
+                html += `<div class="sr-kt-label">上位${TOP_N}つ</div>`;
+                top.forEach(k => { html += rowHTML(k); });
+                html += `<div class="sr-kt-sep">…</div>`;
+                html += `<div class="sr-kt-label">下位${BOT_N}つ</div>`;
+                bottom.forEach(k => { html += rowHTML(k); });
+            } else {
+                sorted.forEach(k => { html += rowHTML(k); });
+            }
+            return html;
         }
 
-        const missIcon = `<span class="sr-kt-icon">${keyTrendSort.col==='miss' ? (keyTrendSort.asc?'▲':'▼') : '⇅'}</span>`;
-        const timeIcon = `<span class="sr-kt-icon">${keyTrendSort.col==='time' ? (keyTrendSort.asc?'▲':'▼') : '⇅'}</span>`;
+        const missIcon = `<span class="sr-kt-icon">${keyTrendMissAsc ? '▲' : '▼'}</span>`;
+        const timeIcon = `<span class="sr-kt-icon">${keyTrendTimeAsc ? '▲' : '▼'}</span>`;
 
-        let rows = '';
-        if (hasGap) {
-            rows += `<tr class="sr-kt-label-row"><td colspan="3">上位${TOP_N}つ</td></tr>`;
-            top.forEach(k => { rows += rowHTML(k); });
-            rows += `<tr class="sr-kt-sep-row"><td colspan="3">…</td></tr>`;
-            rows += `<tr class="sr-kt-label-row"><td colspan="3">下位${BOT_N}つ</td></tr>`;
-            bottom.forEach(k => { rows += rowHTML(k); });
-        } else {
-            sorted.forEach(k => { rows += rowHTML(k); });
-        }
-
-        return `<table class="sr-kt-table">
-          <thead><tr>
-            <th class="sr-kt-th sr-kt-th-key">キー</th>
-            <th class="sr-kt-th sr-kt-th-sort" data-col="miss">ミス率${missIcon}</th>
-            <th class="sr-kt-th sr-kt-th-sort" data-col="time">反応速度${timeIcon}</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>`;
+        return `<div class="sr-kt-cols">
+          <div class="sr-kt-col">
+            <div class="sr-kt-col-head sr-kt-th-sort" data-axis="miss">ミス率${missIcon}</div>
+            ${makeCol(keyList, 'miss', keyTrendMissAsc)}
+          </div>
+          <div class="sr-kt-col">
+            <div class="sr-kt-col-head sr-kt-th-sort" data-axis="time">反応速度${timeIcon}</div>
+            ${makeCol(timedKeys, 'time', keyTrendTimeAsc)}
+          </div>
+        </div>`;
     }
 
     // ── HTML構築 ──────────────────────────────────────────────────
