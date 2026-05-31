@@ -73,6 +73,16 @@ $(() => {
     const weakByTime = keyList.filter(k => k.avgTime > 0).sort((a, b) => b.avgTime - a.avgTime).slice(0, WEAK_N);
     const maxMissRate = weakByMiss.length ? weakByMiss[0].missRate : 1;
     const maxAvgTime  = weakByTime.length ? weakByTime[0].avgTime  : 1;
+    // 得意なキー（ミス率が低くかつ反応が速いキー TOP 3）
+    const maxAllAvgTime = keyList.length ? Math.max(...keyList.map(k => k.avgTime)) || 1 : 1;
+    const goodKeys = keyList
+        .filter(k => (k.misses + k.hits) >= 3)
+        .map(k => ({
+            ...k,
+            goodScore: (1 - k.missRate) * 0.5 + (maxAllAvgTime > 0 ? (1 - k.avgTime / maxAllAvgTime) : 0) * 0.5,
+        }))
+        .sort((a, b) => b.goodScore - a.goodScore)
+        .slice(0, 3);
 
     // レーダー値
     const speedVal = Math.min(100, Math.round(cumCpm / 4));
@@ -231,8 +241,8 @@ $(() => {
         }).join('')}
       </div>
 
-      <!-- 苦手キー：二軸別リスト -->
-      <h3 class="sr-sec" style="margin-top:28px">苦手キー</h3>
+      <!-- キー傾向：二軸別リスト -->
+      <h3 class="sr-sec" style="margin-top:28px">キー傾向</h3>
       <div class="sr-weak-cols">
         <!-- ミスが多いキー -->
         <div class="sr-weak-col">
@@ -269,6 +279,16 @@ $(() => {
               }).join('')
           }
         </div>
+      </div>
+      <h3 class="sr-sec" style="margin-top:16px">得意なキー</h3>
+      <div class="sr-good-keys">
+        ${goodKeys.length === 0
+          ? `<p class="sr-muted" style="font-size:.82em;padding:4px 0">データなし（各キー3回以上必要）</p>`
+          : goodKeys.map((k, i) => {
+              const medalArr = ['🥇', '🥈', '🥉'];
+              return `<span class="sr-good-key">${medalArr[i]} <kbd class="sr-wk-key sr-wk-key--good">${esc(k.ch)}</kbd> ミス率${(k.missRate*100).toFixed(0)}%・${k.avgTime}ms</span>`;
+            }).join('')
+        }
       </div>
     </div>
 
@@ -551,6 +571,9 @@ $(() => {
 }
 .sr-wk-key--miss { background: #fff3e0; border: 1px solid #ffb74d; color: #e65100; }
 .sr-wk-key--time { background: #fff8e1; border: 1px solid #ffd54f; color: #f57f17; }
+.sr-good-keys { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.sr-good-key  { font-size: .82em; color: #444; display: flex; align-items: center; gap: 4px; }
+.sr-wk-key--good { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; }
 .sr-wk-track { flex: 1; background: #f0f0f0; border-radius: 3px; overflow: hidden; height: 16px; min-width: 0; }
 .sr-wk-fill  { height: 16px; line-height: 16px; font-size: .72em; padding-left: 4px; white-space: nowrap; border-radius: 3px; }
 .sr-wk-fill--miss { background: linear-gradient(90deg, #ff8f00, #ffb300); color: #fff; }
